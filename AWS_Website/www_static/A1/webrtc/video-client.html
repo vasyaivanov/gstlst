@@ -1,0 +1,146 @@
+<html>
+<head>
+<script src="/A1/js/webrtc/RTCMultiConnection.js"></script>
+<script src="//cdn.firebase.com/js/client/2.3.2/firebase.js"></script>
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+video {
+	display: block;
+    width: 90%;
+}
+.videoL {
+	position: absolute;
+	width: 100px;
+	right: 20px;
+	border: 1px solid #3F7FBF;
+	display: block;
+}
+</style>
+<script>
+// DUPLICATE SOCKET
+
+var videoClientSocket;
+
+if(typeof parent.socket != "undefined") {
+	videoClientSocket = parent.socket
+}
+else {
+	videoClientSocket = io.connect(document.location.hostname + ':' + location.port);
+}
+
+var participants = new RTCMultiConnection('slite-video');
+
+participants.bandwidth = {
+	audio: 128,
+	video: 256,
+	data: 1638400,
+	screen: 300
+};
+
+
+participants.firebase = 'shining-fire-9184';
+
+participants.sdpConstraints.mandatory = {
+    OfferToReceiveAudio: true,
+    OfferToReceiveVideo: true,
+		IceRestart: true
+};
+
+videoClientSocket.on('sharing-client', function (data) {
+	startSession(data.moderatorId, data.chatMode);
+	function startSession(moderatorId, chatMode) {
+		var MODERATOR_CHANNEL_ID = 'slite-video'; // channel-id
+		var MODERATOR_SESSION_ID = '<%= hash %>-video';    // room-id
+		var MODERATOR_ID         = '' + moderatorId + '';    // user-id
+		var MODERATOR_SESSION = {};
+
+		if(chatMode == 1) {
+			MODERATOR_SESSION    = {
+				audio: false,
+				video: false
+			};
+		}
+		else if(chatMode == 2) {
+			$( "#videosharing" ).addClass( "videoL" );
+			MODERATOR_SESSION    = {
+				video: true,
+				audio: true
+			};
+		}
+
+		participants.join(	{
+				sessionid: MODERATOR_SESSION_ID,
+				userid:    MODERATOR_ID,
+				session:   MODERATOR_SESSION
+			}
+		);
+
+		participants.onstream = function(event) {
+			if(event.isVideo) {
+				if(event.type == "local") {
+					$( "#videosharing" ).append(event.mediaElement);
+					if(navigator.userAgent.indexOf("Firefox") != -1 )  {
+						$("#" + event.streamid).hide();
+						setTimeout(function(){
+							event.mediaElement.play();
+							$("#" + event.streamid).show();
+						}, 1000);
+					}
+				}
+				else if(event.type == "remote") {
+					$( "#videosharingR" ).append(event.mediaElement);
+					if(navigator.userAgent.indexOf("Firefox") != -1 )  {
+						$("#" + event.streamid).hide();
+						setTimeout(function(){
+							event.mediaElement.play();
+							$("#" + event.streamid).show();
+						}, 1000);
+					}
+				}
+			}
+			if (event.isAudio) {
+				$( "#audiosharing" ).append(event.mediaElement);
+			}
+		};
+
+
+		participants.onstreamended = function(event) {
+			if(event.type == "remote" && event.userid == data.moderatorId) {
+				console.log("Lost video connection with presenter. Reconnecting...");
+				location.reload();
+			}
+		};
+
+	}
+
+});
+
+function start() {
+	videoClientSocket.emit("sharing-server", {hash: '<%= hash %>'});
+}
+
+function addStream() {
+	/*participants.removeStream({
+		oneway: true
+	});*/
+
+	participants.addStream({
+		video: true,
+		audio: true
+	});
+
+}
+
+function changeClass() {
+	$( "#videosharing" ).addClass( "videoL" );
+}
+
+</script>
+</head>
+<body onload="start()">
+<div id="videosharing"></div>
+<div id="videosharingR"></div>
+<div id="audiosharing" style="display: none"></div>
+</body>
+</html>

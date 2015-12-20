@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /letscrawl.html
+Disallow: /video.html
+Disallow: /record.html
+Disallow: /screensharing.html
+Disallow: /logout

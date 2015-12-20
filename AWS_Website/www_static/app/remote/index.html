@@ -1,0 +1,156 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>App remote control</title>
+    <meta name="title" content="Live online presentations" />
+    <meta name="description" content="Free online web presentations. Social chat, video presentation, personal presentation notes, password protection and much more." />
+    <meta name="keywords" content="web presentations, web presentation, presentation, powerpoint, free, free online presentation, free presentation, slide, slides, free slides, powerpoint replacement">
+	<meta name="viewport" content="width=device-width, initial-scale=0.9">
+    <!-- Bootstrap Core CSS -->
+    <link href="/new_template/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+    <!-- Custom CSS -->
+    <link href="/new_template/css/stylish-portfolio.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="/new_template/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- jQuery -->
+    <script src="/new_template/js/jquery.js"></script>
+    <script src="/new_template/js/customJs.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/new_template/js/bootstrap.min.js"></script>
+
+    <script src="/js/client.min.js"></script>
+    <script src="/js/jquery-ui.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+	<!--script src="http://jsconsole.com/remote.js?F1F7FCE6-BC71-4006-85A9-571BDB8DBB01"></script-->
+	<script>
+	$( document ).ready(function() {
+		var socket = io.connect(document.location.hostname + ':' + location.port);
+
+		if(localStorage.getItem("presentationsLocal")) {
+			$.each(JSON.parse(localStorage.getItem("presentationsLocal")), function(key, value) {
+				socket.emit("check-presentation-key", {id: key, key: value, check: 1} , function(data) {
+					if(data.code == 3) {
+						var mySlide = "";
+						mySlide += '<tr id="slide_'+ key  +'">';
+						mySlide += '<td width="150"><a href="/' + key + '"><img src="/'+ key +'/img0.jpg" class="img-rounded" width="90%"></a></td>';
+						mySlide += '<td><a href="/' + key + '">'+data.title+'</a></td>';
+						mySlide += '</tr>';
+						$("#myPresTable").append(mySlide);
+
+					}
+				});
+			});
+		}
+
+		$("#slideLogin").show();
+
+		$(document).on("click", "#pres_login_button", function () {
+			if($("#pres_id").val() == "") {
+				showError("Enter presentation ID");
+			}
+			else if($("#pres_pass").val() == "") {
+				showError("Enter presentation key");
+			}
+			else {
+				socket.emit("check-presentation-key", {id: $("#pres_id").val(), key: $("#pres_pass").val()} , function(data) {
+					if(data.code == 1) {
+						showError("Presentation was't found");
+					}
+					else if(data.code == 2) {
+						showError("Wrong key");
+					}
+					else {
+						showError("Key accepted, opening to presentation...");
+						var data = {};
+						if(localStorage.getItem("presentationsLocal")) {
+							data = JSON.parse(localStorage.getItem("presentationsLocal"));
+						}
+						data[$("#pres_id").val()] = $("#pres_pass").val();
+						localStorage.setItem("presentationsLocal", JSON.stringify(data));
+						location.href="/" + $("#pres_id").val();
+					}
+				});
+			}
+		});
+
+		function showError(text) {
+			$("#noticeForm").show();
+			$("#noticeForm").text(text);
+		}
+	});
+
+	function show(id) {
+		if(typeof id != 'undefined') {
+			$(".alldata").hide();
+			$("#" + id).show();
+		}
+	}
+
+	</script>
+</head>
+
+<body class='mainbackground'>
+
+    <section id="slideLogin" class="login mainbackground allData">
+        <div class="title col-xs-12"><h1>PRE<span style='color:red'>Z</span>ERA</h1></div>
+
+        <div class="loginbody">
+				<!--h3>Sign In</h3-->
+				<h4 id="noticeForm" style="color: #FF0000; display:none"></h4>
+                <form role="form" id="pres_login">
+                    <div class="form-group">
+                        <h3>Presentation ID</h3>
+                        <input id="pres_id" class="form-control" placeholder="Enter presentation ID">
+                    </div>
+                    <div class="form-group">
+                        <h3>Presentation password</h3>
+                        <input id="pres_pass"  type="password" class="form-control" name="password" placeholder="Enter presentation password">
+                    </div>
+					<span class="btn-group">
+                    <input type="button" id="pres_login_button" value="Open presentation" class="btn btn-default"/>
+					<input type="button" onclick="show('myPres')" value="My presentations" class="btn btn-default"/>
+					</span>
+				</form>
+					<a href="javascript:show('getKey');">How to get a presentation ID & password?</a>
+            </div>
+    </section>
+
+
+	<section id="getKey" class="login mainbackground allData">
+        <div class="title col-xs-12"><h1>PRE<span style='color:red'>Z</span>ERA</h1></div>
+        <div class="simplePage"><br>
+          <h3>How to get a presentation ID & password?</h3>
+		  <ul>
+			<li>Open your presentation in a web browser</li>
+			<li>Open main meny and click 'Get presenter password'<br><img src="/app/remote/img/getkey.png"></li>
+			<li>After that the system will show you your presentation access credentials</li>
+		  </ul>
+		  <a href="javascript:show('slideLogin')">Go back</a>
+		 </div>
+	</section>
+
+
+	<section id="myPres" class="login mainbackground allData">
+        <div class="title col-xs-12"><h1>PRE<span style='color:red'>Z</span>ERA</h1></div>
+        <div class="simplePage"><br>
+          <h3>My presentations</h3>
+			<table id="myPresTable" class="table" style="max-width: 100%">
+
+			</table>
+		  <a href="javascript:show('slideLogin')">Go back</a>
+		 </div>
+	</section>
+
+
+</body>
+
+</html>
