@@ -3,7 +3,6 @@ var url = require('url')
   , SocketIOFileUploadServer = require("socketio-file-upload")
   , path = require('path')
   , _ = require('underscore')._
-  , Room = require('./room.js')
   , prepare = require('./prepare.js')
   , session = require('express-session')
   , cookieParser = require('cookie-parser')

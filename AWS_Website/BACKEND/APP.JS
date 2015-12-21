@@ -152,7 +152,7 @@ var eventsReg = "[0-9a-zA-Z]{" + eventHashLen + "}";
 var eventsRegMW = new RegExp('^\\/' + eventsReg + '(\\/|$)');
 
 // Auto redirect to WWW, if no subdomain
-var trustedDomains = ["uberguestlist.elasticbeanstalk.com", "localhost"];
+var trustedDomains = ["uberguestlist.elasticbeanstalk.com", "localhost", "ugl.loc"];
 function redirectToWWW(req,res,next) {
 	var domainClear = req.hostname.split('.').reverse()[1] + '.' + req.hostname.split('.').reverse()[0];
 	if(req.hostname.split('.').length == 2) {
