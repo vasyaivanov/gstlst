@@ -4,6 +4,7 @@
 
 .ui-btn{
     text-align: left;
+    font-size: 22px;
 }
 
 #greenCheckmark{
@@ -19,4 +20,12 @@
 
 #popupButton{
 	display: none;
+}
+
+#popupDialog{
+	opacity: 1.0;
+}
+
+#popupDialog-popup{
+	opacity: 1.0;
 }
