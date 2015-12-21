@@ -7,6 +7,7 @@ var url = require('url')
   , session = require('express-session')
   , cookieParser = require('cookie-parser')
   , supportUplExtensions = [".csv"]
+  , csvConverter = require("csvtojson").Converter
   , LOG_COORD = true
   , LOG_GENERAL = true;
 var start = process.hrtime();
@@ -60,93 +61,121 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
               console.log('--------------');
           });
 
-          var uploadDir = path.join(www_dir, "UPLOAD/");
-          function uploadStarted(name){
-              resetElapsedTime();
+		var listParams = {
+		  socket: socket,
+		  opt: {
+			hashSize: module.parent.exports.eventHashLen,
+			EventsScheme: module.parent.exports.Event
+		  }
+		};
+
+		//
+		var uploadDir = path.join(www_dir, "UPLOAD/");
+		function uploadStarted(name){
+		  resetElapsedTime();
+		  if(LOG_GENERAL) {
+			console.log("UPLOAD started  file: " + name);
+		  }
+		}
+		function uploadProgress(name){
 			  if(LOG_GENERAL) {
-				console.log("UPLOAD started  file: " + name);
+				  console.log("UPLOAD progress file: " + name);
 			  }
-          }
-          function uploadProgress(name){
-    			  if(LOG_GENERAL) {
-    				  console.log("UPLOAD progress file: " + name);
-    			  }
-          }
-          function uploadError(type,name) {
-              var data = {};
-          		if(type > 0) {
-          			data.limit = type;
-          		}
-          		else {
-          			data.limit = 0;
-          			console.error("UPLOAD error: " + name);
-          		}
-              data.error = true;
-              socket.emit("listUploadError", data);
-          }
+		}
+		function uploadError(type,name) {
+		  var data = {};
+			if(type > 0) {
+				data.limit = type;
+			}
+			else {
+				data.limit = 0;
+				console.error("UPLOAD error: " + name);
+			}
+		  data.error = true;
+		  socket.emit("listUploadError", data);
+		}
 
-          function uploadComplete(name, origName) {
-              console.log("UPLOADED...Converting file");
-              var listParams = {
-                  socket: socket,
-                  opt: {
-                    hashSize: module.parent.exports.eventHashLen,
-                    EventsScheme: module.parent.exports.Event
-                  }
-              };
+		
+		function uploadComplete(name, origName) {
+			console.log("Uploaded");
+			  var listParams = {
+				  socket: socket,
+				  opt: {
+					hashSize: module.parent.exports.eventHashLen,
+					EventsScheme: module.parent.exports.Event
+				  }
+			  };
 
-              //
-              var newEvent = new prepare.List(listParams, function (err,eventHash) {
-                  if(err) {
-                    console.log("ERROR processing file" + err);
-                  }
-                  else {
-                      console.log("Hash created: " + eventHash);
-                  }
-              });
-          }
-
-          var uploader = new SocketIOFileUploadServer();
-      		uploader.dir = uploadDir;
-      		uploader.listen(socket);
-          uploader.maxFileSize = userSession.restrictions.maxSlideSize;
-
-          uploader.on("start", function (event) {
-  				      uploadStarted(event.file.name);
-          });
-
-      		uploader.on("progress", function (event) {
-      			uploadProgress(event.file.pathName);
-      		});
-
-      		uploader.on("complete", function (event) {
-    				fs.exists(event.file.pathName, function (exists) {
-						 if(supportUplExtensions.indexOf(path.extname(event.file.pathName)) == -1) {
-                console.log("Error: We support only csv files")
-							   fs.unlinkSync(event.file.pathName);
-							   uploadError(3, "");
-						  }
-						  else {
-							if((fs.statSync(event.file.pathName)["size"] > 0)) {
-                console.log("Upload completed");
-								uploadComplete(event.file.pathName, event.file.name);
+			  var newEvent = new prepare.List(listParams, function (err,eventHash) {
+				  if(err) {
+					console.log("ERROR processing file" + err);
+					newEvent.deleteHash();
+				  }
+				  else {
+					console.log("Hash created: " + eventHash);
+					var converter = new csvConverter({});
+					converter.fromFile(name,function(err,result){
+						var operc = (100 / result.length);
+						for(var res in result){
+							socket.emit('uploadProgress', {percentage: Math.floor(operc*res)})
+							var insertData = new module.parent.exports.Guests({Name: result[res].Name, Status: result[res].Status, eventId: eventHash});
+							insertData.save(function(err, saved) {});
+							
+							if(res == result.length - 1) {
+								socket.emit('uploadProgress', {percentage: 100, eventId: eventHash})
 							}
-							else {
-								fs.unlinkSync(event.file.pathName);
-								uploadError(2, "");
-							}
-						 }
-      			});
-      		});
+						}
+					});
+				  }
+			  });
+		}
+
+		var uploader = new SocketIOFileUploadServer();
+		uploader.dir = uploadDir;
+		uploader.listen(socket);
+		uploader.maxFileSize = userSession.restrictions.maxListSize;
+
+		uploader.on("start", function (event) {
+				  uploadStarted(event.file.name);
+		});
+
+		uploader.on("progress", function (event) {
+			uploadProgress(event.file.pathName);
+		});
+
+		uploader.on("complete", function (event) {
+				fs.exists(event.file.pathName, function (exists) {
+					 if(supportUplExtensions.indexOf(path.extname(event.file.pathName)) == -1) {
+						   console.log("Error: We support only csv files")
+						   fs.unlinkSync(event.file.pathName);
+						   uploadError(3, "");
+					  }
+					  else {
+						if((fs.statSync(event.file.pathName)["size"] > 0)) {
+							console.log("Upload completed");
+							uploadComplete(event.file.pathName, event.file.name);
+						}
+						else {
+							fs.unlinkSync(event.file.pathName);
+							uploadError(2, "");
+						}
+					 }
+			});
+		});
 
 
-      		uploader.on("error", function (event) {
-      			uploadError(0, JSON.stringify(event));
-      		});
+		uploader.on("error", function (event) {
+			uploadError(0, JSON.stringify(event));
+		});
+				
 
-          socket.on('error', function (data){
-            console.error(data);
-          });
+		socket.on('error', function (data){
+			console.error(data);
+		});
+		
+      	socket.on('readUserUpload', function (callback) {
+      		callback(userSession.restrictions.maxListSize);
+        });
 
       }
     }

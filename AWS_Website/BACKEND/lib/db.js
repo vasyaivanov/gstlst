@@ -91,10 +91,12 @@
 
   // Guests schema
   var guestsSchema = mongoose.Schema({
-    guestName: { type: String, required: true},
+    Name: { type: String, required: true},
     eventId: { type: String, required: true},
+	Status: {type: String},
     created: { type: Date }
   });
+  
   guestsSchema.pre('save', function(next){
     now = new Date();
     this.created = now;
@@ -103,7 +105,8 @@
     }
     next();
   });
-  guestsSchema.index({guestName: 1, eventId: 1}, {unique: true});
+  
+  guestsSchema.index({Name: 1, eventId: 1}, {unique: true});
 
 
 module.exports = {

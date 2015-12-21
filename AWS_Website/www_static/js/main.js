@@ -36,10 +36,7 @@ $(document).ready(function () {
 
     mainSocket.on('listUploadError', function (rdata) {
 		    var data = {};
-    		if(rdata.limit == 1) {
-    			data.msg = "You've reached the maximum limit of slides per user";
-    		}
-    		else if(rdata.limit == 2) {
+    		if(rdata.limit == 2) {
     			data.msg = "The file is too big";
     		}
     		else if(rdata.limit == 3) {
@@ -48,9 +45,9 @@ $(document).ready(function () {
     		else {
     			data.msg = 'Server error!\nPlease try uploading again. If fails again contact support.';
     		}
-	    //console.log("File conversion failed! " + JSON.stringify(data));
-        data.error = true;
-        data.percentage = 100;
+			//console.log("File conversion failed! " + JSON.stringify(data));
+			data.error = true;
+			data.percentage = 100;
     		updateProgress(data);
     		setTimeout(function(){ window.location = getClearUrl(); }, 10000); // reload after 10 sec
     });
@@ -83,9 +80,6 @@ $(document).ready(function () {
         if (data.percentage >= 0 && !data.error && !finalMsg) {
             msg += "Progress: " + data.percentage + "%";
             newLine = true;
-        } else if(data.slide > 0 && !data.error) {
-            msg += "Loaded slides: " + data.slide + ' ';
-            newLine = true;
         } else {
             printMsg = true;
         }
@@ -95,16 +89,19 @@ $(document).ready(function () {
             }
             msg += data.msg;
         }
-        progressLabel.text(msg);
+        progressLabel.html(msg);
         if (data.percentage >= 0 || data.error) {
             var n = data.error ? 100 :  parseInt(data.percentage, 10);
             progressbar.progressbar("value", n);
         }
     }
 
+	
+	mainSocket.emit('readUserUpload', function(maxFileSize) {
+	
 			var siofu = new SocketIOFileUpload(mainSocket);
 			siofu.chunkSize = 0;
-			siofu.maxFileSize = 10240000;
+			siofu.maxFileSize = maxFileSize;
 			siofu.listenOnInput(document.getElementById("uploadPresentation"));
 
 			siofu.addEventListener("choose", function(event){
@@ -132,31 +129,15 @@ $(document).ready(function () {
 				updateProgress(data);
 				setTimeout(function(){ window.location = getClearUrl(); }, 10000); // reload after 10 sec
 			});
+	});
 
 
 	mainSocket.on("uploadProgress", function (data) {
-        var msg = "Upload Progress";
+        data.msg = "Guest list uploaded!<br>Download our <a href=\"https://itunes.com\">app</a> and enter this password <a><i>" + data.eventId + "</i></a> to manage this guest list";
         if (data.percentage >= 0) {
-            msg += ': ' + data.percentage + '%'
-        }
-        if (data.slite > 0) {
-            msg += ' slide: ' + data.slide;
-        }
-        console.log(msg);
-        if (data.percentage >= 0 || data.slide > 0) {
           data.error = false;
           updateProgress(data);
         }
     });
 
-    mainSocket.on('slitePrepared', function (data) {
-        console.log('File converted: ' + JSON.stringify(data));
-        data.msg = 'Converted successfully!\nYOU WILL BE FORWARDED TO THE URL TO SHARE.';
-        data.percentage = 100;
-        updateProgress(data);
-        setTimeout(function () {
-            var url = getClearHost() + '/' + data.hash;
-            window.location = url;
-        }, 1000); // forward after 1 sec
-    });
 });
