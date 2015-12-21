@@ -5,3 +5,18 @@
 .ui-btn{
     text-align: left;
 }
+
+#greenCheckmark{
+	position:fixed;
+	top: 15%;
+	left: 5%;
+	display: none;
+}
+
+#confirmUser{
+	display: none;
+}
+
+#popupButton{
+	display: none;
+}
