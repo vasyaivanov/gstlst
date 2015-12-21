@@ -9,138 +9,31 @@ var express = require('express')
   , passport = require('passport')
   , util = require('util')
   , LocalStrategy = require('passport-local').Strategy
-  , mongodb = require('mongodb')
-  , mongoose = require('mongoose')
-  , extend = require('mongoose-schema-extend')
-  , mongooserand = require('mongoose-simple-random')
-  , bcrypt = require('bcrypt')
   , path = require('path')
   , moment = require('moment')
-  , SALT_WORK_FACTOR = 10
+  , dbImport = require("./lib/db.js")
   , appPort = 8081
   , ioPort = 1337
   , sessionIdCookie = "GuestListCurrUser"
   , LOG_GENERAL = true
-  , AWS = require('aws-sdk')
-  , AWS_S3_BUCKET = "prezera-"
-  , os = require('os')
   , DEBUG = false
   , paypalIpn = require('paypal-ipn');
-
-/*
-// AWS API config
-AWS.config.region = 'us-west-1';
-// Conf AWS S3
-var AWS_S3 = new AWS.S3({accessKeyId: 'AKIAJS3WIRCZVAXER3XQ',secretAccessKey: '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', region: 'us-west-1'});
-module.exports.AWS_S3 = AWS_S3;
-
-// Create a new bucket for domain
-var hostname = (os.hostname().split('.')[0]) ? (os.hostname().split('.')[0]) : "default";
-AWS_S3_BUCKET = AWS_S3_BUCKET + hostname;
-module.exports.AWS_S3_BUCKET = AWS_S3_BUCKET
-
-AWS_S3.createBucket({Bucket: AWS_S3_BUCKET}	, function(err, data) {
-  if (err) {
-	  console.log("Storage bucket response: " + err.code);
-  }
-  else {
-	  console.log("Storage bucket created:" + data.Location);
-  }
-});*/
 
 var app = express();
 module.exports.app = app;
 module.exports.sessionIdCookie = sessionIdCookie;
 
-mongoose.connect('localhost', 'test');
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function callback() {
-  console.log('Connected to DB');
-});
-
-// User Schema
-var userSchema = mongoose.Schema({
-  email: { type: String, required: true, unique: true, lowercase: true, trim: true},
-  password: { type: String, required: true},
-  role: {type: Number}
-});
-
-userSchema.plugin(mongooserand);
-
-userSchema.index({email: 1}, {unique: true});
-
-
-// Billing
-var billingSchema =  mongoose.Schema({
-  txn_id: { type: String, trim: true},
-  account_type: {type: String, trim: true},
-  uid: {type: String, trim: true},
-  payment_gross: {type: Number},
-  payment_status: {type: String, trim: true},
-  payment_date: {type: Date},
-  activated: {type: Number, default: 0 }
-});
-
-billingSchema.index({txn_id: 1, payment_status: 1, payment_gross: 1}, {unique: true});
-
-var Billing = mongoose.model('billing', billingSchema);
-
-
-// User subscription
-var subscriptionSchema =  mongoose.Schema({
-  uid: { type: String, trim: true, required: true},
-  end_date: {type: Date, required: true}
-});
-
-subscriptionSchema.index({uid: 1}, {unique: true});
-
-var Subscription = mongoose.model('subscription', subscriptionSchema);
-
-// Event schema
-var eventSchema = mongoose.Schema({
-  eventId: { type: String, required: true },
-  name: { type: String, required: true },
-  created: { type: Date },
-});
-
-eventSchema.pre('save', function(next){
-  now = new Date();
-  this.created = now;
-  if ( !this.created ) {
-    this.created = now;
-  }
-  next();
-});
-
-eventSchema.index({eventId: 1}, {unique: true});
-
-var Event = mongoose.model('event', eventSchema);
-
+//------- Importing db
+// User
+var User = dbImport.User;
+module.exports.UserScheme = User;
+// eventsReg
+var Event = dbImport.Event;
 module.exports.Event = Event;
-
-// Guests schema
-var guestsSchema = mongoose.Schema({
-  guestName: { type: String, required: true},
-  eventId: { type: String, required: true},
-  created: { type: Date }
-});
-
-guestsSchema.pre('save', function(next){
-  now = new Date();
-  this.created = now;
-  if ( !this.created ) {
-    this.created = now;
-  }
-  next();
-});
-
-guestsSchema.index({guestName: 1, eventId: 1}, {unique: true});
-
-var Guests = mongoose.model('guest', guestsSchema);
-
+// Guests
+var Guests = dbImport.Guests;
 module.exports.Guests = Guests;
-
+//-----------
 // Users roles
 var rolesRestrictions = {};
 // Basic account
@@ -157,35 +50,6 @@ var Plans = {
 	'2': {desc: 'Gold', price: 10, role: 2},
 	'3': {desc: 'GoldUpgrade', price: 5, role: 2}
 };
-
-
-// Bcrypt middleware
-userSchema.pre('save', function(next) {
-  var user = this;
-  if(!user.isModified('password')) return next();
-
-  bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
-    if(err) return next(err);
-
-    bcrypt.hash(user.password, salt, function(err, hash) {
-      if(err) return next(err);
-      user.password = hash;
-      next();
-    });
-  });
-});
-
-// Password verification
-userSchema.methods.comparePassword = function(candidatePassword, cb) {
-  bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
-    if(err) return cb(err);
-    cb(null, isMatch);
-  });
-};
-
-var User = mongoose.model('User', userSchema);
-
-module.exports.UserScheme = User;
 
 function addUser(password, email, callback) {
 	if(LOG_GENERAL) {

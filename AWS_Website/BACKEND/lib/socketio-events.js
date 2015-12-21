@@ -57,11 +57,8 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
           console.log('SOCKET CONNECTION on', new Date().toLocaleTimeString() + ' Addr: ' + socket.handshake.headers.host + ' Socket: ' + socket.id + ' UserAgent:' + socket.handshake.headers['user-agent']);
           console.log('--------------');
             socket.on('disconnect', function () {
-              if (typeof people[socket.id] !== "undefined") { //this handles the refresh of the name screen
-              }
               console.log('SOCKET DISCONNECT on', new Date().toLocaleTimeString() + ' Addr: ' + socket.handshake.headers.host + ' Socket: ' + socket.id);
               console.log('--------------');
-
           });
 
           var uploadDir = path.join(www_dir, "UPLOAD/");
@@ -99,7 +96,7 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
                   }
               };
 
-              // 
+              //
               var newEvent = new prepare.List(listParams, function (err,eventHash) {
                   if(err) {
                     console.log("ERROR processing file" + err);
