@@ -4,7 +4,6 @@ var url = require('url')
   , path = require('path')
   , _ = require('underscore')._
   , Room = require('./room.js')
-  , uuid = require('node-uuid')
   , prepare = require('./prepare.js')
   , session = require('express-session')
   , cookieParser = require('cookie-parser')
@@ -41,49 +40,8 @@ exports.setDir = function (new_dir, newstaticDir, newEventsReg, callback){
 var pollStatisticsArray = new Array();
 var pollAnswerArray = new Array();
 
-var people = {};
-var rooms = {};
 var sockets = [];
 var chatHistory = {};
-
-function purge(s, action) {
-    if (people[s.id].inroom) { //user is in a room
-    var room = rooms[people[s.id].inroom]; //check which room user is in.
-        if (action === "disconnect") {
-            if (_.contains((room.people), s.id)) {
-                var personIndex = room.people.indexOf(s.id);
-                room.people.splice(personIndex, 1);
-                s.leave(room.name);
-            }
-            delete people[s.id];
-            sizePeople = _.size(people);
-            module.parent.exports.io.sockets.emit("update-people", {people: people, count: sizePeople});
-            var o = _.findWhere(sockets, {'id': s.id});
-            sockets = _.without(sockets, o);
-        } else if (action === "removeRoom") {
-            s.emit("update", "Only the owner can remove a room.");
-        } else if (action === "leaveRoom") {
-            if (_.contains((room.people), s.id)) {
-                var personIndex = room.people.indexOf(s.id);
-                room.people.splice(personIndex, 1);
-                people[s.id].inroom = null;
-                module.parent.exports.io.sockets.emit("update", people[s.id].name + " has left the room.");
-                s.leave(room.name);
-            }
-        }
-    } else {
-        //The user isn't in a room, but maybe he just disconnected, handle the scenario:
-        if (action === "disconnect") {
-            module.parent.exports.io.sockets.emit("update", people[s.id].name + " has disconnected from the server.");
-            delete people[s.id];
-            sizePeople = _.size(people);
-            module.parent.exports.io.sockets.emit("update-people", {people: people, count: sizePeople});
-            var o = _.findWhere(sockets, {'id': s.id});
-            sockets = _.without(sockets, o);
-        }
-    }
-}
-
 
 module.parent.exports.io.use(function (socket, next) {
     if (socket.handshake.query.type == "user" && typeof socket.handshake.query.hash !== 'undefined') {
@@ -100,7 +58,6 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
           console.log('--------------');
             socket.on('disconnect', function () {
               if (typeof people[socket.id] !== "undefined") { //this handles the refresh of the name screen
-                  purge(socket, "disconnect");
               }
               console.log('SOCKET DISCONNECT on', new Date().toLocaleTimeString() + ' Addr: ' + socket.handshake.headers.host + ' Socket: ' + socket.id);
               console.log('--------------');
@@ -142,18 +99,15 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
                   }
               };
 
+              // 
               var newEvent = new prepare.List(listParams, function (err,eventHash) {
                   if(err) {
                     console.log("ERROR processing file" + err);
                   }
                   else {
-                      console.log("Hash created");
-                      console.log(newEvent);
+                      console.log("Hash created: " + eventHash);
                   }
               });
-
-
-
           }
 
           var uploader = new SocketIOFileUploadServer();
