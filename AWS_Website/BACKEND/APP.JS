@@ -99,6 +99,7 @@ var Subscription = mongoose.model('subscription', subscriptionSchema);
 
 // Event schema
 var eventSchema = mongoose.Schema({
+  eventId: { type: String, required: true },
   name: { type: String, required: true },
   created: { type: Date },
 });
@@ -280,12 +281,11 @@ www_dir = path.normalize(www_dir);
 console.log('www_dir: ' + www_dir);
 
 // hash redirection
-var slitesDir = "slites";
-var slitesHashLen = 4;
-module.exports.slitesHashLen = slitesHashLen;
-var slitesReg = "[0-9a-zA-Z]{" + slitesHashLen + "}";
+var eventHashLen = 4;
+module.exports.eventHashLen = eventHashLen;
+var eventsReg = "[0-9a-zA-Z]{" + eventHashLen + "}";
 // middleware do render slites files from /slites folders
-var slitesRegMW = new RegExp('^\\/' + slitesReg + '(\\/|$)');
+var eventsRegMW = new RegExp('^\\/' + eventsReg + '(\\/|$)');
 
 // Auto redirect to WWW, if no subdomain
 var trustedDomains = ["uberguestlist.elasticbeanstalk.com", "localhost"];
@@ -458,7 +458,7 @@ app.use(function (req, res, next) {
       if( doc ) {
         req.url = "/" + doc.sid;
       }
-			var match = req.url.match(slitesRegMW);
+			var match = req.url.match(eventsRegMW);
 			if (match) {                                                     // if hash found in url
 				if (req.url[req.url.length - 1] === '/') {
 					req.url = req.url.slice(0, -1);
@@ -645,7 +645,7 @@ var io = require('socket.io').listen((appPort === ioPort ? server : http), { log
 
 module.exports.io = io;
 
-var socketIoSlite = require("./lib/socketio-slite.js").setDir(www_dir, slitesDir, www_static_dir, slitesReg, function () { });
+var socketIoEvents = require("./lib/socketio-events.js").setDir(www_dir, www_static_dir, eventsReg, function () { });
 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }

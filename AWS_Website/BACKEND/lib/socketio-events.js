@@ -5,15 +5,18 @@ var url = require('url')
   , _ = require('underscore')._
   , Room = require('./room.js')
   , uuid = require('node-uuid')
-  , SLITE_EXT = '.jpg'
-  , SLIDE_REG_EXP = new RegExp('^img\\d+' + SLITE_EXT + '$')
+  , prepare = require('./prepare.js')
   , session = require('express-session')
   , cookieParser = require('cookie-parser')
-  , HTML5_UPLOADER = false
   , supportUplExtensions = [".csv"]
   , LOG_COORD = true
   , LOG_GENERAL = true;
 var start = process.hrtime();
+
+//
+prepare.initCache(module.parent.exports.Event, function(data) {
+  console.log("Hash checked: " + data);
+});
 
 function resetElapsedTime() {
     start = process.hrtime();
@@ -28,12 +31,11 @@ function elapsedTime(note) {
     return elapsed;
 }
 
-var www_dir, slitesDir, staticDir, slitesReg;
-exports.setDir = function (new_dir, newSlitesDir, newstaticDir, newSlitesReg, callback){
+var www_dir, staticDir, eventsReg;
+exports.setDir = function (new_dir, newstaticDir, newEventsReg, callback){
     www_dir = new_dir;
-    slitesDir = newSlitesDir;
     staticDir = newstaticDir;
-    slitesReg = newSlitesReg;
+    eventsReg = newEventsReg;
 }
 
 var pollStatisticsArray = new Array();
@@ -48,7 +50,6 @@ function purge(s, action) {
     if (people[s.id].inroom) { //user is in a room
     var room = rooms[people[s.id].inroom]; //check which room user is in.
         if (action === "disconnect") {
-            //module.parent.exports.io.sockets.emit("update", people[s.id].name + " has disconnected from the server.");
             if (_.contains((room.people), s.id)) {
                 var personIndex = room.people.indexOf(s.id);
                 room.people.splice(personIndex, 1);
@@ -133,7 +134,26 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
 
           function uploadComplete(name, origName) {
               console.log("UPLOADED...Converting file");
-              //converter.convert(name, origName, socket, {www_dir: www_dir, slitesDir: slitesDir, sliteRegExp: SLIDE_REG_EXP, uploadDir: uploadDir, userSessionId: userSession.currentUserId, SlidesScheme: module.parent.exports.SlideScheme,  userAuth: userSession.userAuth, ssite: socket.handshake.headers.host, hashSize: module.parent.exports.slitesHashLen, domain: userSession.restrictions.domain, domainSet: userSession.domainSet, AWS_S3: module.parent.exports.AWS_S3, AWS_S3_BUCKET: module.parent.exports.AWS_S3_BUCKET, removeDirFunc: module.parent.exports.deleteFolderRecursive});
+              var listParams = {
+                  socket: socket,
+                  opt: {
+                    hashSize: module.parent.exports.eventHashLen,
+                    EventsScheme: module.parent.exports.Event
+                  }
+              };
+
+              var newEvent = new prepare.List(listParams, function (err,eventHash) {
+                  if(err) {
+                    console.log("ERROR processing file" + err);
+                  }
+                  else {
+                      console.log("Hash created");
+                      console.log(newEvent);
+                  }
+              });
+
+
+
           }
 
           var uploader = new SocketIOFileUploadServer();
@@ -162,7 +182,6 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
 								uploadComplete(event.file.pathName, event.file.name);
 							}
 							else {
-                console.log("0 file");
 								fs.unlinkSync(event.file.pathName);
 								uploadError(2, "");
 							}

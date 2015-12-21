@@ -33,16 +33,6 @@
     "xml2js": "^0.4.5",
     "moment": "^2.10",
     "du": "^0.1.0",
-    "node-bing-api": "",
-    "mongoose-simple-random": "",
-    "request": "",
-    "paypal-ipn": "",
-  	"scmp": "",
-  	"jwt-simple": "",
-  	"q": "",
-  	"jsonwebtoken": "",
-  	"deprecate": "",
-  	"string.prototype.startswith": "",
     "aws-sdk": ""
   },
   "scripts": {
