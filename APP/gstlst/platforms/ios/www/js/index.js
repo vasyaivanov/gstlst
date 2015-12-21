@@ -1,3 +1,5 @@
+var mainSocket = io.connect(document.location.hostname + ':' + location.port);
+
 var guestlistMetadata = {
     eventName: "Ruby Skye New Years party",
     guests: [
