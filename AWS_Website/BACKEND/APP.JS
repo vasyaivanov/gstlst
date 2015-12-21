@@ -11,15 +11,15 @@ var express = require('express')
   , LocalStrategy = require('passport-local').Strategy
   , mongodb = require('mongodb')
   , mongoose = require('mongoose')
+  , extend = require('mongoose-schema-extend')
   , mongooserand = require('mongoose-simple-random')
   , bcrypt = require('bcrypt')
   , path = require('path')
-  , converter = require('./lib/converter.js')
   , moment = require('moment')
   , SALT_WORK_FACTOR = 10
   , appPort = 8081
   , ioPort = 1337
-  , sessionIdCookie = "sliteCurrUser"
+  , sessionIdCookie = "GuestListCurrUser"
   , LOG_GENERAL = true
   , AWS = require('aws-sdk')
   , AWS_S3_BUCKET = "prezera-"
@@ -27,6 +27,7 @@ var express = require('express')
   , DEBUG = false
   , paypalIpn = require('paypal-ipn');
 
+/*
 // AWS API config
 AWS.config.region = 'us-west-1';
 // Conf AWS S3
@@ -45,7 +46,7 @@ AWS_S3.createBucket({Bucket: AWS_S3_BUCKET}	, function(err, data) {
   else {
 	  console.log("Storage bucket created:" + data.Location);
   }
-});
+});*/
 
 var app = express();
 module.exports.app = app;
@@ -62,58 +63,12 @@ db.once('open', function callback() {
 var userSchema = mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true},
   password: { type: String, required: true},
-  role: {type: Number},
-  domain: {type: String, lowercase: true}
+  role: {type: Number}
 });
 
 userSchema.plugin(mongooserand);
 
 userSchema.index({email: 1}, {unique: true});
-
-// Notes
-var notesSchema = mongoose.Schema({
-  uid: { type: String},
-  sid: { type: String},
-  note: { type: String},
-  tmp: {type: String},
-  created: { type: Date },
-  updated: { type: Date }
-});
-
-notesSchema.pre('save', function(next){
-  now = new Date();
-  this.created = now;
-  this.updated = now;
-  next();
-});
-
-notesSchema.index({uid: 1, sid: 1}, {unique: true});
-
-var Note = mongoose.model('note', notesSchema);
-
-
-
-module.exports.NoteScheme = Note;
-
-
-// Chat
-var chatSchema = mongoose.Schema({
-  uid: { type: String},
-  sid: { type: String},
-  name: { type: String},
-  msg: { type: String},
-  created: { type: Date }
-});
-
-chatSchema.pre('save', function(next){
-  now = new Date();
-  this.created = now;
-  next();
-});
-
-var Chat = mongoose.model('chat', chatSchema);
-
-module.exports.chatSchema = Chat;
 
 
 // Billing
@@ -142,36 +97,13 @@ subscriptionSchema.index({uid: 1}, {unique: true});
 
 var Subscription = mongoose.model('subscription', subscriptionSchema);
 
-// SlidesDB
-var slidesSchema = mongoose.Schema({
-  uid: { type: String, required: true},
-  sid: { type: String, required: true},
-  scid: { type: String},
-  title: { type: String},
-  size: { type: Number, required: true},
-  tmp: {type: String, default: 1},
+// Event schema
+var eventSchema = mongoose.Schema({
+  name: { type: String, required: true },
   created: { type: Date },
-  crawled: { type: Number,  default: 0 },
-  url: {type: String},
-  desc: { type: String },
-  site: { type: String },
-  keywords: { type: String },
-  password: { type: String },
-  paypalTransaction: { type: String },
-  paypalTmpExp: { type: Date },
-  paypalPayed: { type: Number, max: 1, default: 0,  },
-  isVideoChatOpen: { type: Number,  default: 0,  max: 1 },
-  isScreensharingOpen: { type: Number,  default: 0,  max: 1 },
-  isOnlinePresentation: { type: Number,  default: 0,  max: 1 },
-  hidden: { type: Number,  default: 0 , max: 1},
-  domainSet: {type: Number,  default: 0 , max: 1 },
-  slidesNum: {type: Number},
-  presentationKey: {type: Number}
 });
 
-slidesSchema.plugin(mongooserand);
-
-slidesSchema.pre('save', function(next){
+eventSchema.pre('save', function(next){
   now = new Date();
   this.created = now;
   if ( !this.created ) {
@@ -180,11 +112,33 @@ slidesSchema.pre('save', function(next){
   next();
 });
 
-slidesSchema.index({uid: 1, sid: 1}, {unique: true});
+eventSchema.index({eventId: 1}, {unique: true});
 
-var Slide = mongoose.model('slide', slidesSchema);
+var Event = mongoose.model('event', eventSchema);
 
-module.exports.SlideScheme = Slide;
+module.exports.Event = Event;
+
+// Guests schema
+var guestsSchema = mongoose.Schema({
+  guestName: { type: String, required: true},
+  eventId: { type: String, required: true},
+  created: { type: Date }
+});
+
+guestsSchema.pre('save', function(next){
+  now = new Date();
+  this.created = now;
+  if ( !this.created ) {
+    this.created = now;
+  }
+  next();
+});
+
+guestsSchema.index({guestName: 1, eventId: 1}, {unique: true});
+
+var Guests = mongoose.model('guest', guestsSchema);
+
+module.exports.Guests = Guests;
 
 // Users roles
 var rolesRestrictions = {};
@@ -334,7 +288,7 @@ var slitesReg = "[0-9a-zA-Z]{" + slitesHashLen + "}";
 var slitesRegMW = new RegExp('^\\/' + slitesReg + '(\\/|$)');
 
 // Auto redirect to WWW, if no subdomain
-var trustedDomains = ["prezera-dev.elasticbeanstalk.com","slite.elasticbeanstalk.com", "localhost"];
+var trustedDomains = ["uberguestlist.elasticbeanstalk.com", "localhost"];
 function redirectToWWW(req,res,next) {
 	var domainClear = req.hostname.split('.').reverse()[1] + '.' + req.hostname.split('.').reverse()[0];
 	if(req.hostname.split('.').length == 2) {
@@ -437,30 +391,7 @@ else {
 					console.log('Bot or crawler: ' + req.url + ' : ' + req.headers['user-agent']);
 					var split_hash = req.path.split("/");
 					var hash = req.path.replace("/","");
-					if(split_hash.length == 2) {
-						Slide.findOne({	$or: [{sid: hash} ,  {scid: hash}]}, function (err, doc) {
-							if(doc){
-								var images = '';
-								if(doc.slidesNum > 0) {
-									for (i=0;i<=doc.slidesNum; i++) {
-										images += "<img width='70%' src='/" + doc.sid + "/img" + i +".jpg'><br>"
-									}
-								}
-								res.render(path.join(www_dir, www_static_dir, "fake_slide.html"), {
-									title: doc.title,
-									img: images
-								});
-							}
-							else {
-								// No slide
-								next();
-							}
-						});
-					}
-					else {
-						// Not a slide
-						next();
-					}
+					next();
 				}
 				else {
 					//console.log("Initialize new session");
@@ -479,21 +410,9 @@ else {
 							UserData[userId].userRole = 0;
 							UserData[userId].restrictions = rolesRestrictions[0];
 							UserData[userId].domainSet = 0;
-						}
-						getUserUploadStatus(userId, function(userAccess) {
-							UserData[userId].noUploadForUser = userAccess;
-							// Set user session
-							UserData[userId].expire = new Date(new Date().getTime() + 86400000);
-							module.exports.UserData[userId] = UserData[userId];
-							// Clear old sessions
-							for (k in UserData) {
-							  var dateComp = new Date();
-							  if(dateComp > UserData[k].expire) {
-									delete UserData[k];
-							  }
-							}
-							next();
-						});
+					  }
+            module.exports.UserData[userId] = UserData[userId];
+						next();
 					});
 				}
 			}
@@ -518,78 +437,23 @@ app.use(function (req, res, next) {
 	});
 });
 
-
-// Calculate user slides size sum & slides count
-var getUserUploadStatus = function (userId, callback) {
-	Slide.find({uid : userId }).exec(function (err, docs) {
-		if( docs ) {
-			var slidesMB = 0;
-			for(i=0;i<docs.length;i++) {
-				slidesMB = slidesMB + docs[i].size;
-			}
-			if(docs.length >= UserData[userId].restrictions.maxSlidesCount) {
-				callback(1);
-			}
-			else if(slidesMB >= UserData[userId].restrictions.maxSlidesSize) {
-				callback(1);
-			}
-			else {
-				callback(0);
-			}
-		}
-		else {
-			callback(0);
-		}
-	});
-}
-
-module.exports.getUserUploadStatus = getUserUploadStatus;
-
 app.use(redirectToWWW);
-
 
 // Auth array
 var UserData = {};
 module.exports.UserData = {};
 
 
-// Visualize custom domain slide
-app.use(function (req, res, next) {
-	var customHash = req.url.substring(1);
-	customHash = customHash.replace(/^\?/,"");
-
-	var domainClear = 'www.' + req.hostname.split('.').reverse()[1] + '.' + req.hostname.split('.').reverse()[0];
-
-	if(customHash != '' && req.hostname.split('.')[0] != 'www' && !path.extname(customHash)) {
-		User.findOne({ domain: req.hostname.split('.')[0] }).exec(function (errU, docU) {
-			if(docU) {
-			  Slide.findOne({ $or: [{sid: customHash} ,  {scid: { $regex : new RegExp("^" + customHash + "$" , "i") }}] , uid: docU._id , paypalPayed: 1, site: domainClear, domainSet: 1 }).exec(function (err, doc) {
-				  if(doc) {
-					req.url = "/" + doc.sid;
-					next();
-				  }
-				  else {
-					res.send("Presentation was not found");
-				  }
-			  });
-			}
-			else {
-			  res.send("Can't find user:" + req.hostname);
-			}
-		});
-	}
-	else {
-		next();
-	}
-});
-
 // Visualize slides
 app.use(function (req, res, next) {
 
+  //console.log(UserData);
+
 	var customHash = req.url.substring(1);
 	customHash = customHash.replace(/^\?/,"");
 	var domainClear = 'www.' + req.hostname.split('.').reverse()[1] + '.' + req.hostname.split('.').reverse()[0];
-	Slide.findOne( {scid : { $regex : new RegExp("^" + customHash + "$" , "i") } , paypalPayed: 1, site: domainClear, domainSet: 0 }).exec(function (err, doc) {
+
+	/*Slide.findOne( {scid : { $regex : new RegExp("^" + customHash + "$" , "i") } , paypalPayed: 1, site: domainClear, domainSet: 0 }).exec(function (err, doc) {
 		if(err) {console.log(err)}
       if( doc ) {
         req.url = "/" + doc.sid;
@@ -650,7 +514,7 @@ app.use(function (req, res, next) {
 					var hashPath = path.join(wwwSlites, hash);
 					console.log('Downloading presentation from: ', hashPath);
 					var supportUplExtensions = [".ppt", ".pptx"];
-					
+
 					// Get File from Amazon S3
 					AWS_S3.listObjects({Bucket: AWS_S3_BUCKET, Prefix: hash}, function(err, data) {
 					  data.Contents.forEach(function(content) {
@@ -659,7 +523,7 @@ app.use(function (req, res, next) {
 						}
 					  });
 					});
-					
+
 				} else {                                                    // all other files from www_static folder
 					console.log('Arbitrary hash file: ' + afterHash);
 					var fileOptions = { lastModified: true, maxAge: 0 };
@@ -680,112 +544,14 @@ app.use(function (req, res, next) {
 				next();
 			}
 		//}
-	});
+	});*/
+  next();
 });
 
 // ROUTES
 var router = express.Router();
 
-router.post('/paypal', function (req, res, next) {
-
-res.send("Received");
-
-paypalIpn.verify(req.body, {'allow_sandbox': true}, function callback(err, msg) {
-    if(msg == "VERIFIED") {
-		var accountType = ["NA", "Silver", "Gold", "Gold upgrade"];
-		if(accountType.indexOf(req.body["option_selection1"]) > 0) {
-			var txnId = req.body["parent_txn_id"] ? req.body["parent_txn_id"] : req.body["txn_id"];
-
-			console.log("Paypal data received: " + txnId + " - Type: " + req.body["payment_status"]);
-
-			if(req.body["payment_status"]) {
-				var billing_add = new Billing({txn_id: txnId, account_type: req.body["option_selection1"], uid: req.body["option_selection2"], payment_gross: req.body["payment_gross"], payment_date: req.body["payment_date"], payment_status: req.body["payment_status"]});
-				billing_add.save(function(err, saved) {
-					if(err) console.error('Can\'t add billing info' + err);
-				});
-
-				if(req.body["payment_status"] == "Completed" && Plans[req.body.item_number].role != 'undefined') {
-					var dateG = new Date(req.body["payment_date"]);
-					dateG.setFullYear(dateG.getFullYear()+1);
-
-					if(req.body.item_number == 3) {
-						dateG = "$end_date";
-					}
-
-					Subscription.update({ uid: req.body["option_selection2"] }, {$set: { uid : req.body["option_selection2"], end_date: dateG }}, {upsert: true},
-						function (err, numAffected) {console.log('Subscription: ' + numAffected + err)}
-					);
-
-					User.update({ _id: mongoose.mongo.ObjectID(req.body["option_selection2"]) }, {$set: { role : Plans[req.body.item_number].role }}, {upsert: false},
-						function (err, numAffected) {console.log('Role changes: ' + numAffected + err)}
-					);
-
-				}
-				else if(req.body["payment_status"] == "Refunded") {
-
-				}
-			}
-		}
-		else {
-			Slide.update({  sid : req.body["option_selection1"]}, { $set: { paypalTransaction: req.body["txn_id"], paypalPayed: 1 }}).exec();
-		}
-	}
-});
-
-});
-
-function changeAccount(userId) {
-
-}
-
-router.get('/paypal', function (req, res, next) {
-
-
-Billing.aggregate([
-        { $group: {
-            _id: '$uid',
-            balance: { $sum: '$payment_gross'}
-        }}
-    ], function (err, results) {
-        if (err) {
-            console.error(err);
-        } else {
-            console.log(results);
-        }
-    });
-
-	if(req.query.tx) {
-		Billing.findOne({txn_id : req.query.tx }).exec(function (err, doc) {
-			if(doc) {
-				res.redirect("/#myAccount");
-			}
-			else {
-				Slide.findOne({paypalTransaction : req.query.tx }).exec(function (err, doc) {
-					if( doc ) {
-						var url = '/' + doc.scid;
-						if(doc.site) {url = 'http://' + doc.site + url}
-						res.redirect(url);
-					} else {
-				var str = " \
-						Processing payment... \
-						<meta http-equiv=\"refresh\" content=\"10\" /> \
-					";
-					res.send(str);
-					}
-				});
-			}
-		});
-	}
-	else {
-    res.redirect('/');
-	}
-
-});
-
-
-
 function setUserSession(req, res, callback) {
-	//console.log("------------ Checking user session, IP: " + req.connection.remoteAddress);
 	var oldUserId = 0;
 	var expDate = new Date(Number(new Date()) + 315360000000);
 
@@ -798,349 +564,37 @@ function setUserSession(req, res, callback) {
 		domainClear = host.split('.').reverse()[1] + '.' + host.split('.').reverse()[0];
 	}
 
-   // If no user id - generate or add from req.user._id
    if(!(req.cookies[sessionIdCookie])) {
 		var userIpAddress = req.connection.remoteAddress.replace(/\./g,"");
 		var newUserId = (req.user) ? req.user._id.toString() : Math.floor(Math.random() * (99999999999 - 1)) + 1 + userIpAddress + Math.round(+new Date()/1000);
 		//console.log("Setting new session cookie");
 		res.cookie(sessionIdCookie, newUserId, { domain: '.' + domainClear, expires: expDate });
 		callback(0);
-		//callback(newUserId);
    }
 	else {
-
 		var domainClear = req.hostname.split('.').reverse()[1] + '.' + req.hostname.split('.').reverse()[0];
-		// User loged in, but has older, random generated id
 		if((req.user) && (req.user._id != req.cookies[sessionIdCookie])) {
-			//console.log("-----------Setting new user id");
 			oldUserId = req.cookies[sessionIdCookie];
 			res.cookie(sessionIdCookie, req.user._id.toString() , {  domain: '.' + domainClear, expires: expDate });
-
-			// Update user Notes
-			Note.update({  uid : oldUserId, tmp: 1 }, { $set: { tmp: 0, uid: req.user._id }}, {multi: true, upsert: false},
-				function (err, numAffected) {
-					if(err) console.log(err);
-					if(numAffected > 0) {console.log("Remaped notes: " + numAffected)}
-			});
-			// Update user slides
-			var domainSet = (req.user.domain && rolesRestrictions[req.user.role].domain == 1) ? 1 : 0;
-			var paypalPayed = (domainSet == 1) ? 1 : 0;
-				Slide.update({  uid : oldUserId, tmp: 1 }, { $set: { tmp: 0, uid: req.user._id, domainSet: domainSet, paypalPayed: paypalPayed }}, {multi: true, upsert: false},
-					function (err, numAffected) {
-						if(err) console.log(err);
-						if(numAffected > 0) {console.log("Remaped slides: " + numAffected)}
-				});
-				// Send page reload
 				callback(0);
 		}
 		else {
-			//console.log("-------------User is set");
 			callback(req.cookies[sessionIdCookie]);
 		}
 	}
 }
+
 // Index page
 var rootRegExp = new RegExp('^/($|index(\.html)?$)');
 router.get(rootRegExp, function (req, res){
-
   var domainClear = req.hostname.split('.').reverse()[1] + '.' + req.hostname.split('.').reverse()[0];
-
 	var domainSplit = req.hostname.split('.');
-
-	if(domainSplit.length == 3 && domainSplit[0] != 'www' && trustedDomains.indexOf(req.headers.host) == -1) {
-		User.findOne({ domain : domainSplit[0] }, function (err, docs) {
-			if(docs) {
-        var owner = 0;
-        if(typeof req.cookies[sessionIdCookie] != "undefined") {
-          owner = (docs._id == UserData[req.cookies[sessionIdCookie]].currentUserId && req.user) ? 1 : 0;
-        }
-				Slide.find({uid : docs._id }).sort({'created': 'desc'}).exec(function (err, docs) {
-					res.render(path.join(www_dir,www_static_dir , 'domain.html'), { owner: owner,	moment: moment, slides: docs, user: req.user , mainDomainGo: ((req.headers['x-forwarded-proto']) ? req.headers['x-forwarded-proto'] : "https") + '://www.' + domainClear, clearDomain: domainSplit[0] + '.' + domainClear, userData: UserData[req.cookies[sessionIdCookie]]});
-				});
-			}
-			else {
-				res.redirect(((req.headers['x-forwarded-proto']) ? req.headers['x-forwarded-proto'] : "https") + '://www.' + domainClear);
-			}
-		});
-	}
-	else {
-		res.header("Cache-Control", "no-cache, no-store, must-revalidate");
-		res.header("Pragma", "no-cache");
-		res.header("Expires", 0);
-
-		var totalSlides = 0;
-
-		// Paint index page random slides
-		function getRandomSlides(Slide, callback) {
-			Slide.findRandom({site: req.headers.host}, {}, {skip: 0, limit: 10},function(err, result) {
-			  if (!err) {
-				var returnRes = '<!-- Elastislide Carousel --><ul id="carousel" class="elastislide-list">';
-
-				for(i=0;i<result.length;i++) {
-					var url = (result[i].scid ? result[i].scid : result[i].sid)
-					returnRes += '<li><a href="/'+ url +'"  title="'+ result[i].title +'"><img src="/'+ result[i].sid +'/img0.jpg" alt="'+ result[i].title +'" class="slider-img" /></a></li>\n'
-				}
-				returnRes += '</ul> \
-				<!-- SLIDE CAROUSEL --> \
-				<script type="text/javascript"> \
-					$( \'#carousel\' ).elastislide(); \
-				</script>'
-				callback(returnRes, result)
-			  }
-			});
-		}
-
-		getRandomSlides(Slide,function(randomSlides, clearData) {
-			if(typeof req.cookies[sessionIdCookie] != "undefined") {
-				Slide.find({uid : UserData[req.cookies[sessionIdCookie]].currentUserId }).sort({'created': 'desc'}).exec(function (err, docs) {
-					Subscription.findOne({uid : req.cookies[sessionIdCookie] }).exec(function (err, docExpDate) {
-						var expire = "";
-						if(docExpDate) {expire = docExpDate.end_date}
-						res.render(path.join(www_dir, www_static_dir, indexHtml), {
-							user: req.user,
-							noUploadForUser: UserData[req.cookies[sessionIdCookie]].noUploadForUser,
-							randomSlides: randomSlides,
-							userRole: UserData[req.cookies[sessionIdCookie]].userRole,
-							request: req,
-							slides: docs,
-							ERROR_AUTH: 0,
-							error: 0,
-							moment: moment,
-							expire: expire,
-							userData: UserData[req.cookies[sessionIdCookie]],
-							domains: []
-						});
-					});
-				});
-			}
-			else {
-				// No cookie - no upload and other stuff :)
-
-        User.findRandom({domain: {$exists: true}}, {}, {limit: 10}, function (err, customDomains) {
-  				res.render(path.join(www_dir, www_static_dir, indexHtml), {
-  					user: req.user,
-  					noUploadForUser: 2,
-  					randomSlides: clearData,
-  					userRole: 0,
-  					request: req,
-  					ERROR_AUTH: 0,
-  					error: 0,
-  					slides: [],
-  					expire: '',
-  					userData: { restrictions: rolesRestrictions[0] },
-					domains: customDomains,
-					clearDomain: domainClear
-  				});
-        });
-			}
-		});
-	}
-});
-
-router.post('/signup.html', function (req, res){
-  console.log("MA: new user: " + req.body.password + " " + req.body.email);
-  var errorCode = 0;
-  if( !req.body.password || !req.body.email ) {
-    res.json({ error: '1' });
-  }
-  else {
-	addUser(req.body.password, req.body.email,
-	function (error_code) {
-		if(error_code > 0) {
-			// Error codes: 1 - user exists, 2 - email exists, 3 - wrong email,  4 - other DB errors, 5 - Passwords are different
-			res.json({ error: error_code });
-		}
-		else {
-			passport.authenticate('local')(req, res, function () {
-				res.json({ error: 0, account: req.body.account });
-			})
-		}
-	}
-	);
-  }
-});
-
-router.get('/letscrawl.html', function (req, res){
-	res.send('Crawl is very dangerous! :)');
-	if(req.query.password == "startme321!") {
-		console.log("Crawling");
-		require("./lib/crawler.js").crawl(req.headers.host,20, Slide, www_dir, slitesDir);
-	}
-	else {
-		console.log("Wrong password");
-	}
-});
-
-router.post('/signin.html',
-  function(req, res, next) {
-    passport.authenticate('local', function(err, user, info) {
-      if (err) {
-		  res.json({ error: '1' });
-	  }
-      else if (!user) {
-		res.json({ error: '2' });
-	  }
-	  else {
-		  req.logIn(user, function(err) {
-			if (err) { return next(err); }
-			// Set new session after login is mandotary for middleware
-			setUserSession(req,res,function(userId) {});
-			//return res.redirect(req.body.redirect ? req.body.redirect : '/');
-		  });
-		  res.json({ error: '0' });
-	  }
-    })(req, res, next);
-});
-
-
-router.get('/logout', function (req, res){
-	req.logout();
-	req.session.destroy(function (err) {
-		if (err) {
-			console.log("MA: logout error: " + err);
-			res.redirect('/logout');
-		}
-		res.clearCookie('connect.sid', { path: '/' });
-		delete UserData[req.cookies[sessionIdCookie]];
-		var domainClear = req.hostname.split('.').reverse()[1] + '.' + req.hostname.split('.').reverse()[0];
-		res.clearCookie(sessionIdCookie , {  domain: '.' + domainClear });
-		res.redirect('/');
-	});
-});
-
-readSlideSize = function(path_to_slide, callback) {
-	var size = require('du')(path_to_slide, { filter: function (f) { return /\.(ppt|pptx)$/.test(f) } },  function (err, size) {
-		callback(size);
-	});
-}
-
-module.exports.readSlideSize = readSlideSize;
-
-// Render remote control
-slideCheckPresenter = function(hashId, currentUserId , callback) {
-	if(currentUserId) {
-		Slide.findOne({sid : hashId }).exec(function (err, doc) {
-			if( doc ) {
-				callback(
-					1, // [0] - Prese found
-					(doc.uid == currentUserId) ? 1 : 0, // [1] Is presenter?
-					doc.title, // [2] Pres title
-					doc.password, // [3] Pres access password
-					(doc.paypalPayed == 1 || UserData[currentUserId].restrictions.rename == 1) ? 1 : 0, // [4] Payed pres
-					doc.scid, // [5] Pres custom ID
-					(doc.isVideoChatOpen) ? 1 : "0", // [6] Is video chat open?
-					(doc.isScreensharingOpen) ? 1 : "0", // [7] Is Screen Sharing open
-					(doc.slidesNum > 0) ? doc.slidesNum : 1, // [8] Num of slides
-					(doc.domainSet) ? 1 : 0, // [9] Is domain set for this account?
-					(doc.presentationKey) ? doc.presentationKey : 0 //[10] Access key for presentation
-				); 
-			} else {
-				callback(0,0,"","", 0, "");
-			}
-		});
-	}
-	else {
-		callback(0,0,"","", 0, "");
-	}
-}
-
-module.exports.slideCheckPresenter = slideCheckPresenter;
-
-router.get('/screensharing.html', function (req, res){
-  if(typeof req.cookies[sessionIdCookie] === "undefined") {
-    res.redirect('/');
-  }
-  else {
-		var hashId = req.query.presentation;
-			slideCheckPresenter(hashId, UserData[req.cookies[sessionIdCookie]].currentUserId , function(sfound, spresenter, stitle, spassword) {
-				if(sfound == 1 && spresenter == 1) {
-					res.render(path.join(www_dir,www_static_dir , 'A1/webrtc/sharing-presenter.html'), {hash: hashId, userId: UserData[req.cookies[sessionIdCookie]].currentUserId});
-				}
-				else if(sfound == 1 && spresenter == 0) {
-					res.render(path.join(www_dir,www_static_dir , 'A1/webrtc/sharing-client.html'), {hash: hashId, userId: UserData[req.cookies[sessionIdCookie]].currentUserId});
-				}
-				else {
-					res.send("Presentation was not found")
-				}
-			});
-    }
-});
-
-router.get('/video.html', function (req, res){
-  if(typeof req.cookies[sessionIdCookie] === "undefined") {
-    res.redirect('/');
-  }
-  else {
-		var hashId = req.query.presentation;
-			slideCheckPresenter(hashId, UserData[req.cookies[sessionIdCookie]].currentUserId , function(sfound, spresenter, stitle, spassword) {
-				if(sfound == 1 && spresenter == 1) {
-					res.render(path.join(www_dir,www_static_dir , 'A1/webrtc/video-presenter.html'), {hash: hashId, userId: UserData[req.cookies[sessionIdCookie]].currentUserId});
-				}
-				else if(sfound == 1 && spresenter == 0) {
-					res.render(path.join(www_dir,www_static_dir , 'A1/webrtc/video-client.html'), {hash: hashId, userId: UserData[req.cookies[sessionIdCookie]].currentUserId});
-				}
-				else {
-					res.send("Presentation was not found")
-				}
-			});
-    }
-});
-
-
-router.get('/record.html', function (req, res){
-  if(typeof req.cookies[sessionIdCookie] === "undefined") {
-    res.redirect('/');
-  }
-  else {
-		var hashId = req.query.presentation;
-			slideCheckPresenter(hashId, UserData[req.cookies[sessionIdCookie]].currentUserId , function(sfound, spresenter, stitle, spassword) {
-				if(sfound == 1 && spresenter == 1) {
-					res.render(path.join(www_dir,www_static_dir , 'A1/webrtc/record.html'), {hash: hashId, userId: UserData[req.cookies[sessionIdCookie]].currentUserId});
-				}
-				else {
-					res.send("Only presenter can record the screen")
-				}
-			});
-    }
-});
-
-router.get(new RegExp('^/video/(index\.html)?$'), function (req, res) {
-	var AccessToken = require('twilio').AccessToken;
-	// Substitute your Twilio AccountSid and ApiKey details
-	var ACCOUNT_SID = 'AC066339c9614f030f60c239ce61e5307b';
-	var API_KEY_SID = 'SKebc6b891be532615c9ec223cc9d0691c';
-	var API_KEY_SECRET = 'GQCRbQObWtmuEsWYGf3AdttlyfJ3XPVp';
-	// Create an Access Token
-	var accessToken = new AccessToken(ACCOUNT_SID,API_KEY_SID,API_KEY_SECRET);
-	var presenter = 0;
-	if(req.query.presenter == 1) {
-		presenter = 1;
-		accessToken.identity = 'presenter';
-	}
-	else {
-		accessToken.identity = 'user' + Math.floor(Math.random() * (9999 - 1));
-	}
-	var grant = new AccessToken.ConversationsGrant();
-	grant.configurationProfileSid = 'VSc492521f04edbafda6af34c8e211afe0';
-	accessToken.addGrant(grant);
-	var jwt = accessToken.toJwt();
-	res.render(path.join(www_dir,www_static_dir , 'video/index.html'), {token: jwt, presenter: presenter, user: accessToken.identity});
-});
-
-
-router.get('/clearcash', function (req, res){
-	console.log(req.header('x-forwarded-for'))
-	if(req.query.password == "LetsClearItup") {
-		res.send("Cleaning cash...");
-		deleteOldHashFolders();
-	}
+  res.render(path.join(www_dir, www_static_dir, indexHtml), {});
 });
 
 app.use('/', router);
 
-//app.use(express.static(www_dir));
 app.use(express.static(path.join(www_dir, www_static_dir)));
-
 
 // ERROR HANDLING
 // custom 404 page
@@ -1198,79 +652,7 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/#login');
 }
 
-module.exports.deleteFolderRecursive = function(path) {
-	if( fs.existsSync(path)) {
-		fs.readdirSync(path).forEach(function(file,index){
-		  var curPath = path + "/" + file;
-		  if(fs.lstatSync(curPath).isDirectory()) {
-			module.exports.deleteFolderRecursive(curPath);
-		  } else {
-			fs.unlink(curPath, function (err) {
-				if(DEBUG) {
-					if (err) console.log("Can't delete file " + err);
-					console.log(curPath + 'successfully deleted');
-				}
-			});
-		  }
-		});
 
-		fs.rmdir(path, function (err) {
-			if(DEBUG) {
-				if (err) console.log("Can't delete folder " + err);
-				console.log(path + 'successfully deleted');
-			}
-		});
-	}
-}
-
-function deleteOldHashFolders() {
-	var hashPath = path.join(www_dir, slitesDir);
-	// Clear old folders
-	fs.readdirSync(hashPath).forEach(function (folder, index) {
-		Slide.findOne({sid: folder }, function (err, slidesDoc) {
-				if(!slidesDoc) module.exports.deleteFolderRecursive(path.join(hashPath, folder));
-		});
-	});
-	// Clear notes
-	Slide.find({}, function (err, slidesDoc) {
-		var documents = new Array;
-		slidesDoc.forEach(function(doc) {
-			documents.push(doc.sid);
-		});
-		Note.find({sid: {$nin : documents}}, function (nerr, notesDoc) {
-			var docsToDelete = new Array;
-			notesDoc.forEach(function(nDoc) {
-				if(nDoc.sid!='A1') {
-					nDoc.remove();
-				}
-			});
-		});
-	});
-}
-
-function getS3fileUrl(path) {
-	var params = {Bucket: AWS_S3_BUCKET, Key: path};
-	var url = AWS_S3.getSignedUrl('getObject', params);
-	return (url) ? url : null;
-}
-
-
-function deleteS3path(path) {
-	
-	AWS_S3.listObjects({Bucket: AWS_S3_BUCKET, Prefix: path}, function(err, data) {
-	  params = {Bucket: AWS_S3_BUCKET};
-	  params.Delete = {};
-	  params.Delete.Objects = [];
-
-	  data.Contents.forEach(function(content) {
-		params.Delete.Objects.push({Key: content.Key});
-	  });
-
-	  AWS_S3.deleteObjects(params, function(err, data) {});
-	});
-}
-
-module.exports.deleteS3path = deleteS3path;
 
 function readUserRights(userId, callback) {
 	User.findOne({_id: userId }, function (err, userDoc) {
