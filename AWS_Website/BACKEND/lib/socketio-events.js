@@ -52,7 +52,7 @@ module.parent.exports.io.use(function (socket, next) {
 
 module.parent.exports.io.sockets.on('connection', function (socket) {
     if(typeof module.parent.exports.UserData  !== "undefined") {
-      //var userSession = module.parent.exports.UserData[module.parent.exports.getCookie(socket.handshake.headers.cookie,module.parent.exports.sessionIdCookie)];
+      var userSession = module.parent.exports.UserData[module.parent.exports.getCookie(socket.handshake.headers.cookie,module.parent.exports.sessionIdCookie)];
 	  
 	  if(typeof userSession == "undefined") {
 		  // Look like we have an App session
@@ -140,6 +140,7 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
 										socket.emit('uploadProgress', {percentage: 100, eventId: eventHash})
 									}
 								}
+								fs.unlinkSync(name);
 							}
 						});
 					});
