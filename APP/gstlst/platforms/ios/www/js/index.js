@@ -1,5 +1,4 @@
-var socket = io.connect("http://uberguestlist.elasticbeanstalk.com/");
-
+var socket = io.connect("https://www.uberguestlist.com/");
 var guestlistMetadata = {};
 
 function guestClicked(guestId, guestName){
@@ -31,11 +30,28 @@ function markGuest(guestId, guestName){
 		$("#cancelDeleteGuest").click();    
 }
 
+// Show pass windows if server is online
+socket.on("connect", function(err) {
+	console.log("Connection is online")
+	$("#enterEventPass").show();
+	if($("#eventPassword").val() != "") {
+		$("#eventButton").click();
+	}
+});
+
+// 
+socket.on("disconnect", function(err) {
+	console.log("Lost connection")
+	$("#event").hide();
+	$("#enterEventPass").show();
+	$(".ui-controlgroup-controls").empty();
+});
+
 $("#eventButton").click(function() {
 	socket.emit("getEvent", {eventId: $("#eventPassword").val()} , function(eventData) {
 		if(eventData.code == 1) {
 			// Event wasn't found
-			alert("Event wasn't found");
+			$("#enterEventError").text("Event wasn't found");
 		}
 		else {
 			guestlistMetadata = {
@@ -63,8 +79,10 @@ $("#eventButton").click(function() {
 			}
 			
 			$("#enterEventPass").hide();
+			$("#enterEventError").text("");
 			$("#event").show();
 
 		}
 	});
 });
+
