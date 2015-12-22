@@ -1,4 +1,4 @@
-var socket = io.connect("http://www.ugl.loc:80");
+var socket = io.connect("http://uberguestlist.elasticbeanstalk.com/");
 
 var guestlistMetadata = {};
 
@@ -16,6 +16,13 @@ function guestClicked(guestId, guestName){
 }
 
 function markGuest(guestId, guestName){
+
+		for (i = 0; i < guestlistMetadata.guests.length; i++) {
+			if(guestId == guestlistMetadata.guests[i].fakeid) {
+				// Send socket to remove
+			}
+		}
+
 		var id = "#" + guestId;
 		$(id).hide('slow');
 		$( "#greenCheckmark" ).show( "fast", 
@@ -46,6 +53,7 @@ $("#eventButton").click(function() {
 						var guests = guestlistMetadata.guests;
 						for (i = 0; i < guests.length; i++) {
 							var newId = Math.floor(Math.random() * (9999999 - 1111111) + 1111111);
+							guestlistMetadata.guests[i].fakeid = newId;
 							guests[i].fakeid = newId;
 							var guest= $('<a id="'+ guests[i].fakeid +'" href="#" class="ui-btn ui-shadow ui-corner-all" onclick="guestClicked(\'' + guests[i].fakeid + '\',\''+ guests[i].Name + '\')">' + guests[i].Name + '</a>');
 							$(".ui-controlgroup-controls ").append(guest);
