@@ -516,7 +516,16 @@ function ensureAuthenticated(req, res, next) {
   res.redirect('/#login');
 }
 
-
+module.exports.checkEvent = function(eventId, callback) {
+	Event.findOne({eventId : eventId }).exec(function (err, doc) {
+		if( doc ) {
+			callback({found: 1, name: doc.name});
+		}
+		else {
+			callback({found: 0});			
+		}
+	});
+}
 
 function readUserRights(userId, callback) {
 	User.findOne({_id: userId }, function (err, userDoc) {

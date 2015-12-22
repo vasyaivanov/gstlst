@@ -116,15 +116,24 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
 					var converter = new csvConverter({});
 					converter.fromFile(name,function(err,result){
 						var operc = (100 / result.length);
-						for(var res in result){
-							socket.emit('uploadProgress', {percentage: Math.floor(operc*res)})
-							var insertData = new module.parent.exports.Guests({Name: result[res].Name, Status: result[res].Status, eventId: eventHash});
-							insertData.save(function(err, saved) {});
-							
-							if(res == result.length - 1) {
-								socket.emit('uploadProgress', {percentage: 100, eventId: eventHash})
+						var insertEvent = new module.parent.exports.Event({eventId: eventHash, name: origName});
+						insertEvent.save(function(err, saved) {
+							if(err) {
+								uploadError(0);
+								newEvent.deleteHash();
 							}
-						}
+							else {
+								for(var res in result){
+									socket.emit('uploadProgress', {percentage: Math.floor(operc*res)})
+									var insertData = new module.parent.exports.Guests({Name: result[res].Name, Status: result[res].Status, eventId: eventHash});
+									insertData.save(function(err, saved) {});
+									
+									if(res == result.length - 1) {
+										socket.emit('uploadProgress', {percentage: 100, eventId: eventHash})
+									}
+								}
+							}
+						});
 					});
 				  }
 			  });
@@ -176,8 +185,20 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
       	socket.on('readUserUpload', function (callback) {
       		callback(userSession.restrictions.maxListSize);
         });
+		
+      	socket.on('getEvent', function (data, callback) {
+			module.parent.exports.checkEvent(data.eventId, function(ret) {
+				if(ret.found == 1) {
+					module.parent.exports.Guests.find({eventId: data.eventId, Status: "Going"}, function(err, docs) {
+						callback({code: 0, guests: docs, name: ret.name});
+					});
+				}
+				else {
+					callback({code: 1});
+				}
+			});
+        });	
 
       }
     }
-
 });
