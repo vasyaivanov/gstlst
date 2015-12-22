@@ -1,56 +1,62 @@
-var mainSocket = io.connect(document.location.hostname + ':' + location.port);
+var socket = io.connect("http://www.ugl.loc:80");
 
-var guestlistMetadata = {
-    eventName: "Ruby Skye New Years party",
-    guests: [
-        {"guestName":"Konstantin Raskoshniy", "guestId":"1"}, 
-        {"guestName":"Jim Duhovniy", "guestId":"2"}, 
-        {"guestName":"Anna Ivanova", "guestId":"3"}, 
-        {"guestName":"John Doe", "guestId":"4"}, 
-        {"guestName":"Anna Yorkoalnvoa", "guestId":"5"}, 
-        {"guestName":"Bob Alekxsnadi", "guestId":"6"}, 
-        {"guestName":"Anna", "guestId":"7"}, 
-        {"guestName":"John", "guestId":"8"}, 
-        {"guestName":"Anna Bobana", "guestId":"9"}, 
-        {"guestName":"Евгений Духовный", "guestId":"10"}
-    ]
-}
-
-document.addEventListener("deviceready", onDeviceReady, false);
-var isDeviceReady = false;
-function onDeviceReady(){
-    if(!isDeviceReady){
-        isDeviceReady = true;
-        $("#eventName").html(guestlistMetadata.eventName);
-        if(guestlistMetadata && guestlistMetadata.guests && guestlistMetadata.guests.length>0){
-            var guests = guestlistMetadata.guests;
-            for (i = 0; i < guests.length; i++) { 
-                var guest= $('<a id="'+ guests[i].guestId +'" href="#" class="ui-btn ui-shadow ui-corner-all" onclick="guestClicked(\'' + guests[i].guestId + '\',\''+ guests[i].guestName + '\')">' + guests[i].guestName + '</a>');
-                $(".ui-controlgroup-controls ").append(guest);
-            }
-        }
-    }
-}
+var guestlistMetadata = {};
 
 function guestClicked(guestId, guestName){
-    
-    /*var id = "#" + guestId;
-    $(id).hide('slow');
-    $( "#greenCheckmark" ).show( "fast", 
-        function() {setTimeout(function(){ $( "#greenCheckmark" ).hide(); }, 1000);   
-    });*/
+	
+	/*var id = "#" + guestId;
+	$(id).hide('slow');
+	$( "#greenCheckmark" ).show( "fast", 
+		function() {setTimeout(function(){ $( "#greenCheckmark" ).hide(); }, 1000);   
+	});*/
 
-    $("#confirmDeleteGuestName").html(guestName + "?");
-    $("#confirmDeleteGuest").attr("onclick", "markGuest('" + guestId + "','"+ guestName + "')");
-    $("#popupButton").click();
+	$("#confirmDeleteGuestName").html(guestName + "?");
+	$("#confirmDeleteGuest").attr("onclick", "markGuest('" + guestId + "','"+ guestName + "')");
+	$("#popupButton").click();
 }
 
 function markGuest(guestId, guestName){
-        var id = "#" + guestId;
-        $(id).hide('slow');
-        $( "#greenCheckmark" ).show( "fast", 
-            function() {setTimeout(function(){ $( "#greenCheckmark" ).hide(); }, 1000);   
-        });
-        $("#cancelDeleteGuest").click();    
+		var id = "#" + guestId;
+		$(id).hide('slow');
+		$( "#greenCheckmark" ).show( "fast", 
+			function() {setTimeout(function(){ $( "#greenCheckmark" ).hide(); }, 1000);   
+		});
+		$("#cancelDeleteGuest").click();    
 }
 
+$("#eventButton").click(function() {
+	socket.emit("getEvent", {eventId: $("#eventPassword").val()} , function(eventData) {
+		if(eventData.code == 1) {
+			// Event wasn't found
+			alert("Event wasn't found");
+		}
+		else {
+			guestlistMetadata = {
+				eventName: eventData.name,
+				guests: eventData.guests
+			};
+
+			document.addEventListener("deviceready", onDeviceReady, false);
+			var isDeviceReady = false;
+			function onDeviceReady(){
+				if(!isDeviceReady){
+					isDeviceReady = true;
+					$("#eventName").html(guestlistMetadata.eventName);
+					if(guestlistMetadata && guestlistMetadata.guests && guestlistMetadata.guests.length>0){
+						var guests = guestlistMetadata.guests;
+						for (i = 0; i < guests.length; i++) {
+							var newId = Math.floor(Math.random() * (9999999 - 1111111) + 1111111);
+							guests[i].fakeid = newId;
+							var guest= $('<a id="'+ guests[i].fakeid +'" href="#" class="ui-btn ui-shadow ui-corner-all" onclick="guestClicked(\'' + guests[i].fakeid + '\',\''+ guests[i].Name + '\')">' + guests[i].Name + '</a>');
+							$(".ui-controlgroup-controls ").append(guest);
+						}
+					}
+				}
+			}
+			
+			$("#enterEventPass").hide();
+			$("#event").show();
+
+		}
+	});
+});

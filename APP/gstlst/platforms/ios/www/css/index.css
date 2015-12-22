@@ -29,3 +29,8 @@
 #popupDialog-popup{
 	opacity: 1.0;
 }
+
+
+#event {
+	display: none;
+}
