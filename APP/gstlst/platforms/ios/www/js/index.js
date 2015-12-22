@@ -1,6 +1,7 @@
 
 if(typeof io != "undefined") {
-	var socket = io.connect("https://www.uberguestlist.com/");
+	//var socket = io.connect("https://www.uberguestlist.com/");
+	var socket = io.connect("http://www.ugl.loc/");
 	var guestlistMetadata = {};
 
 	function guestClicked(guestId, guestName){
@@ -17,19 +18,26 @@ if(typeof io != "undefined") {
 	}
 
 	function markGuest(guestId, guestName){
-
 			for (i = 0; i < guestlistMetadata.guests.length; i++) {
 				if(guestId == guestlistMetadata.guests[i].fakeid) {
 					// Send socket to remove
+					console.log("Guest was found")
+					socket.emit("markGuest", {eventId: $("#eventPassword").val(), guestId: guestlistMetadata.guests[i]._id }, function(data) {
+						if(data.code == 0) {
+							removeFromList(guestId);
+						}
+					});
 				}
-			}
-
-			var id = "#" + guestId;
-			$(id).hide('slow');
-			$( "#greenCheckmark" ).show( "fast", 
-				function() {setTimeout(function(){ $( "#greenCheckmark" ).hide(); }, 1000);   
-			});
-			$("#cancelDeleteGuest").click();    
+			} 
+	}
+	
+	function removeFromList(guestId) {
+		var id = "#" + guestId;
+		$(id).hide('slow');
+		$( "#greenCheckmark" ).show( "fast", 
+			function() {setTimeout(function(){ $( "#greenCheckmark" ).hide(); }, 1000);   
+		});
+		$("#cancelDeleteGuest").click();
 	}
 
 	// Show pass windows if server is online
@@ -51,6 +59,14 @@ if(typeof io != "undefined") {
 		$(".ui-controlgroup-controls").empty();
 	});
 
+	socket.on("markedUser", function(data) {
+		for (i = 0; i < guestlistMetadata.guests.length; i++) {
+			if(data.guestId == guestlistMetadata.guests[i]._id) {
+				removeFromList(guestlistMetadata.guests[i].fakeid);
+			}
+		}
+	});
+	
 	$("#eventButton").click(function() {
 		socket.emit("getEvent", {eventId: $("#eventPassword").val()} , function(eventData) {
 			if(eventData.code == 1) {
