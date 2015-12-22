@@ -52,7 +52,15 @@ module.parent.exports.io.use(function (socket, next) {
 
 module.parent.exports.io.sockets.on('connection', function (socket) {
     if(typeof module.parent.exports.UserData  !== "undefined") {
-      var userSession = module.parent.exports.UserData[module.parent.exports.getCookie(socket.handshake.headers.cookie,module.parent.exports.sessionIdCookie)];
+      //var userSession = module.parent.exports.UserData[module.parent.exports.getCookie(socket.handshake.headers.cookie,module.parent.exports.sessionIdCookie)];
+	  
+	  if(typeof userSession == "undefined") {
+		  // Look like we have an App session
+		  userSession = {};
+		  userSession.restrictions = {};
+		  userSession.restrictions.maxListSize = 0;
+	  }
+	  
       if(typeof userSession !== "undefined") {
           console.log('SOCKET CONNECTION on', new Date().toLocaleTimeString() + ' Addr: ' + socket.handshake.headers.host + ' Socket: ' + socket.id + ' UserAgent:' + socket.handshake.headers['user-agent']);
           console.log('--------------');
