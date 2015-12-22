@@ -94,6 +94,7 @@
     Name: { type: String, required: true},
     eventId: { type: String, required: true},
 	Status: {type: String},
+	marked: {type: Number, default: 0 },
     created: { type: Date }
   });
   

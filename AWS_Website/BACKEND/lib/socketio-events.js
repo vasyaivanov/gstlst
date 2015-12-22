@@ -189,8 +189,34 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
       	socket.on('getEvent', function (data, callback) {
 			module.parent.exports.checkEvent(data.eventId, function(ret) {
 				if(ret.found == 1) {
-					module.parent.exports.Guests.find({eventId: data.eventId, Status: "Going"}, function(err, docs) {
+					module.parent.exports.Guests.find({eventId: data.eventId, Status: "Going", marked: 0}, function(err, docs) {
 						callback({code: 0, guests: docs, name: ret.name});
+					});
+				}
+				else {
+					callback({code: 1});
+				}
+			});
+        });
+		
+      	socket.on('markGuest', function (data, callback) {
+			module.parent.exports.checkEvent(data.eventId, function(ret) {
+				if(ret.found == 1) {
+					module.parent.exports.checkGuest(data.eventId, data.guestId, function(res) {
+						if(res.found == 1) {
+							module.parent.exports.Guests.update({eventId: data.eventId , _id: data.guestId},{$set: {marked: 1}}, function(err,updated) {
+								if(err) {
+									callback({code: 1});
+								}
+								else {
+									socket.broadcast.emit('markedUser', {eventId: data.eventId ,guestId: data.guestId});
+									callback({code: 0});
+								}
+							});
+						}
+						else {
+							callback({code: 1});
+						}
 					});
 				}
 				else {

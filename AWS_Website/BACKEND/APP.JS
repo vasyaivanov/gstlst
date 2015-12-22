@@ -527,6 +527,17 @@ module.exports.checkEvent = function(eventId, callback) {
 	});
 }
 
+module.exports.checkGuest = function(eventId ,guestId, callback) {
+	Guests.findOne({_id : guestId, eventId: eventId }).exec(function (err, doc) {
+		if( doc ) {
+			callback({found: 1});
+		}
+		else {
+			callback({found: 0});			
+		}
+	});
+}
+
 function readUserRights(userId, callback) {
 	User.findOne({_id: userId }, function (err, userDoc) {
 		if(userDoc) {callback(userDoc.role > 0 ? userDoc.role : 0)}
