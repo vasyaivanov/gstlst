@@ -61,7 +61,7 @@ if(typeof io != "undefined") {
 
 	socket.on("markedUser", function(data) {
 		for (i = 0; i < guestlistMetadata.guests.length; i++) {
-			if(data.guestId == guestlistMetadata.guests[i]._id) {
+			if(data.guestId == guestlistMetadata.guests[i]._id && data.eventId == guestlistMetadata.guests[i].eventId) {
 				removeFromList(guestlistMetadata.guests[i].fakeid);
 			}
 		}
