@@ -1,7 +1,7 @@
 
 if(typeof io != "undefined") {
-	//var socket = io.connect("https://www.uberguestlist.com/");
-	var socket = io.connect("http://www.ugl.loc/");
+	var socket = io.connect("https://www.uberguestlist.com/");
+	//var socket = io.connect("http://www.ugl.loc/");
 	var guestlistMetadata = {};
 
 	function guestClicked(guestId, guestName){
