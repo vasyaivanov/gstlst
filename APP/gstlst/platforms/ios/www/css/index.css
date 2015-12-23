@@ -24,6 +24,7 @@
 
 #popupDialog{
 	opacity: 1.0;
+  background-color: #FFFFFF;
 }
 
 #popupDialog-popup{
