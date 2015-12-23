@@ -37,14 +37,14 @@ if(typeof io != "undefined") {
 					console.log("Guest was found")
 					socket.emit("markGuest", {eventId: $("#eventPassword").val(), guestId: guestlistMetadata.guests[i]._id }, function(data) {
 						if(data.code == 0) {
-							removeFromList(guestId,1);
+							appObj.removeFromList(guestId,1);
 						}
 					});
 				}
 			}
 	}
 
-	function removeFromList(guestId,showMark) {
+	appObj.removeFromList = function(guestId,showMark) {
 		var id = "#" + guestId;
 		$(id).hide('slow');
 		if(showMark == 1) {
@@ -62,41 +62,48 @@ if(typeof io != "undefined") {
 			$("#loadingPage").hide();
 			$("#enterEventPass").show();
 		}
-		//if($(""))
 	});
 
 	//
 	socket.on("disconnect", function(err) {
-		console.log("Lost connection")
+		console.log("Lost connection");
 		$("#event").hide();
 		$("#enterEventPass").hide();
 		$("#loadingPage").show();
-		$(".ui-controlgroup-controls").empty();
 	});
 
 
 	socket.on("reconnect", function(err) {
 		console.log("Reconnected");
-		loadList();
+		appObj.loadList();
 	});
 
 	socket.on("markedUser", function(data) {
 		for (i = 0; i < guestlistMetadata.guests.length; i++) {
 			if(data.guestId == guestlistMetadata.guests[i]._id && data.eventId == guestlistMetadata.guests[i].eventId) {
-				removeFromList(guestlistMetadata.guests[i].fakeid,0);
+				appObj.removeFromList(guestlistMetadata.guests[i].fakeid,0);
 			}
 		}
 	});
 
 	$("#eventButton").click(function() {
-		loadList();
+		appObj.loadList();
 	});
 
+	$("#changeEventBut").click(function () {
+		$("#eventPassword").val("");
+		$("#event").hide();
+		$("#enterEventPass").show();
+	});
 
-	function loadList() {
+	appObj.loadList = function() {
+		guestlistMetadata = {};
+		$(".ui-controlgroup-controls").empty();
 		socket.emit("getEvent", {eventId: $("#eventPassword").val()} , function(eventData) {
 			if(eventData.code == 1) {
 				// Event wasn't found
+				$("#event").hide();
+				$("#enterEventPass").show();
 				$("#enterEventError").text("Event wasn't found");
 			}
 			else {
