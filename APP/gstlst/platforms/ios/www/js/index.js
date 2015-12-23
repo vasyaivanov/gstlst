@@ -117,29 +117,19 @@ if(typeof io != "undefined") {
 					eventName: eventData.name,
 					guests: eventData.guests
 				};
-
-				document.addEventListener("deviceready", onDeviceReady, false);
-				var isDeviceReady = false;
-				function onDeviceReady(){
-					if(!isDeviceReady){
-						isDeviceReady = true;
-						$("#eventName").html(guestlistMetadata.eventName);
-						if(guestlistMetadata && guestlistMetadata.guests && guestlistMetadata.guests.length>0){
-							var guests = guestlistMetadata.guests;
-							for (i = 0; i < guests.length; i++) {
-								var newId = Math.floor(Math.random() * (9999999 - 1111111) + 1111111);
-								guestlistMetadata.guests[i].fakeid = newId;
-								guests[i].fakeid = newId;
-								guests[i].Name = guests[i].Name.replace("'","");
-								var guest= $('<a id="'+ guests[i].fakeid +'" href="#" class="ui-btn ui-shadow ui-corner-all" onclick="appObj.guestClicked(\'' + guests[i].fakeid + '\',\''+ guests[i].Name + '\')">' + guests[i].Name + '</a>');
-								$(".ui-controlgroup-controls ").append(guest);
-							}
-						}
+				$("#eventName").html(guestlistMetadata.eventName);
+				if(guestlistMetadata && guestlistMetadata.guests && guestlistMetadata.guests.length>0){
+					var guests = guestlistMetadata.guests;
+					for (i = 0; i < guests.length; i++) {
+						var newId = Math.floor(Math.random() * (9999999 - 1111111) + 1111111);
+						guestlistMetadata.guests[i].fakeid = newId;
+						guests[i].fakeid = newId;
+						guests[i].Name = guests[i].Name.replace("'","");
+						var guest= $('<a id="'+ guests[i].fakeid +'" href="#" class="ui-btn ui-shadow ui-corner-all" onclick="appObj.guestClicked(\'' + guests[i].fakeid + '\',\''+ guests[i].Name + '\')">' + guests[i].Name + '</a>');
+						$(".ui-controlgroup-controls ").append(guest);
 					}
 				}
-
 				$("#event").show();
-				//$(".ui-controlgroup-controls ").hide();
 			}
 		});
 	}
