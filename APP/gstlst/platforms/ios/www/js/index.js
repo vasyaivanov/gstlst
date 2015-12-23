@@ -58,8 +58,8 @@ if(typeof io != "undefined") {
 	// Show pass windows if server is online
 	socket.on("connect", function(err) {
 		console.log("Connection is online");
+		$("#loadingPage").hide();
 		if($("#eventPassword").val() == "") {
-			$("#loadingPage").hide();
 			$("#enterEventPass").show();
 		}
 	});
