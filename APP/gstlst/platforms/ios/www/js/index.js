@@ -58,9 +58,6 @@ if(typeof io != "undefined") {
 		console.log("Connection is online");
 		$("#loadingPage").hide();
 		$("#enterEventPass").show();
-		if($("#eventPassword").val() != "") {
-			$("#eventButton").click();
-		}
 	});
 
 	// 
