@@ -1,2 +1,3 @@
 AWS_Website/BACKEND/node_modules/
-
+AWS_Website/UPLOAD/*
+*.zip

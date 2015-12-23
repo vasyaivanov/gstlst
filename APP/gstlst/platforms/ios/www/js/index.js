@@ -35,7 +35,7 @@ if(typeof io != "undefined") {
 				if(guestId == guestlistMetadata.guests[i].fakeid) {
 					// Send socket to remove
 					console.log("Guest was found")
-					socket.emit("markGuest", {eventId: $("#eventPassword").val(), guestId: guestlistMetadata.guests[i]._id }, function(data) {
+					socket.emit("markGuest", {eventId: $("#eventPassword").val().toLowerCase(), guestId: guestlistMetadata.guests[i]._id }, function(data) {
 						if(data.code == 0) {
 							appObj.removeFromList(guestId,1);
 						}
@@ -104,7 +104,7 @@ if(typeof io != "undefined") {
 	appObj.loadList = function() {
 		guestlistMetadata = {};
 		$(".ui-controlgroup-controls").empty();
-		socket.emit("getEvent", {eventId: $("#eventPassword").val()} , function(eventData) {
+		socket.emit("getEvent", {eventId: $("#eventPassword").val().toLowerCase()} , function(eventData) {
 			$("#loadingPage").hide();
 			if(eventData.code == 1) {
 				// Event wasn't found
