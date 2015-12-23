@@ -58,8 +58,8 @@ if(typeof io != "undefined") {
 	// Show pass windows if server is online
 	socket.on("connect", function(err) {
 		console.log("Connection is online");
-		$("#loadingPage").hide();
 		if($("#eventPassword").val() == "") {
+			$("#loadingPage").hide();
 			$("#enterEventPass").show();
 		}
 	});
@@ -75,7 +75,9 @@ if(typeof io != "undefined") {
 
 	socket.on("reconnect", function(err) {
 		console.log("Reconnected");
-		appObj.loadList();
+		if($("#eventPassword").val() != "") {
+			appObj.loadList();
+		}
 	});
 
 	socket.on("markedUser", function(data) {
@@ -87,6 +89,9 @@ if(typeof io != "undefined") {
 	});
 
 	$("#eventButton").click(function() {
+		$("#loadingPage").show();
+		$("#enterEventPass").hide();
+		$("#enterEventError").text("");
 		appObj.loadList();
 	});
 
@@ -100,6 +105,7 @@ if(typeof io != "undefined") {
 		guestlistMetadata = {};
 		$(".ui-controlgroup-controls").empty();
 		socket.emit("getEvent", {eventId: $("#eventPassword").val()} , function(eventData) {
+			$("#loadingPage").hide();
 			if(eventData.code == 1) {
 				// Event wasn't found
 				$("#event").hide();
@@ -132,11 +138,8 @@ if(typeof io != "undefined") {
 					}
 				}
 
-				$("#enterEventPass").hide();
-				$("#enterEventError").text("");
-				//$(".ui-controlgroup-controls ").hide();
 				$("#event").show();
-
+				//$(".ui-controlgroup-controls ").hide();
 			}
 		});
 	}
