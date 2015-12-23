@@ -189,7 +189,7 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
       	socket.on('getEvent', function (data, callback) {
 			module.parent.exports.checkEvent(data.eventId, function(ret) {
 				if(ret.found == 1) {
-					module.parent.exports.Guests.find({eventId: data.eventId, Status: "Going", marked: 0}, function(err, docs) {
+					module.parent.exports.Guests.find({eventId: data.eventId, Status: "Going", marked: 0}).sort({'Name': 'asc'}).exec(function(err, docs) {
 						callback({code: 0, guests: docs, name: ret.name});
 					});
 				}

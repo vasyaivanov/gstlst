@@ -4,6 +4,17 @@ if(typeof io != "undefined") {
 	//var socket = io.connect("http://www.ugl.loc/");
 	var guestlistMetadata = {};
 
+	// Functionality: hiding list before an orginized enters guest's name
+	/*$("#filterControlgroup-input").on("keydown", function (e) {
+		console.log($("#filterControlgroup-input").val().length);
+		if($("#filterControlgroup-input").val().length >= 1) {
+			$(".ui-controlgroup-controls").show();
+		}
+		else {
+			$(".ui-controlgroup-controls").hide();
+		}
+	});*/
+	
 	function guestClicked(guestId, guestName){
 		
 		/*var id = "#" + guestId;
@@ -102,6 +113,7 @@ if(typeof io != "undefined") {
 				
 				$("#enterEventPass").hide();
 				$("#enterEventError").text("");
+				//$(".ui-controlgroup-controls ").hide();
 				$("#event").show();
 
 			}
