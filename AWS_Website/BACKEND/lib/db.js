@@ -5,7 +5,7 @@
   , SALT_WORK_FACTOR = 10
   ;
 
-  mongoose.connect('localhost', 'test');
+  mongoose.connect('localhost', 'uberglist');
 
   var db = mongoose.connection;
   db.on('error', console.error.bind(console, 'connection error:'));
