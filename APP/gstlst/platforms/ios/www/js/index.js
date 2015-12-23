@@ -24,19 +24,21 @@ if(typeof io != "undefined") {
 					console.log("Guest was found")
 					socket.emit("markGuest", {eventId: $("#eventPassword").val(), guestId: guestlistMetadata.guests[i]._id }, function(data) {
 						if(data.code == 0) {
-							removeFromList(guestId);
+							removeFromList(guestId,1);
 						}
 					});
 				}
 			} 
 	}
 	
-	function removeFromList(guestId) {
+	function removeFromList(guestId,showMark) {
 		var id = "#" + guestId;
 		$(id).hide('slow');
-		$( "#greenCheckmark" ).show( "fast", 
-			function() {setTimeout(function(){ $( "#greenCheckmark" ).hide(); }, 1000);   
-		});
+		if(showMark == 1) {
+			$( "#greenCheckmark" ).show( "fast", 
+				function() {setTimeout(function(){ $( "#greenCheckmark" ).hide(); }, 1000);   
+			});
+		}
 		$("#cancelDeleteGuest").click();
 	}
 
@@ -62,7 +64,7 @@ if(typeof io != "undefined") {
 	socket.on("markedUser", function(data) {
 		for (i = 0; i < guestlistMetadata.guests.length; i++) {
 			if(data.guestId == guestlistMetadata.guests[i]._id && data.eventId == guestlistMetadata.guests[i].eventId) {
-				removeFromList(guestlistMetadata.guests[i].fakeid);
+				removeFromList(guestlistMetadata.guests[i].fakeid,0);
 			}
 		}
 	});
