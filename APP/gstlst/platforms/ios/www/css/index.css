@@ -1,3 +1,78 @@
+
+body{
+    font-family: "Source Sans Pro","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+#helpPanel{
+    display: none;
+}
+
+ul.mainMenu li{
+    cursor: pointer;
+    font-weight: bold;
+    text-align: left;
+}
+
+#page1{
+    margin-top:7%;
+}
+
+#pageHeader{
+        border: none;
+    background: none;
+}
+
+#menuButton{
+    border-style: none;
+    border-color: none;
+    background: none;
+    height: 15px;
+
+    border-style: none;
+    border-bottom: none;
+    margin: 0px;
+    padding: 0px;
+    font-size: 23px;
+    height: 24px;
+    background: none;
+    background-image: none;
+    padding: 1px;
+}
+
+.ui-btn-icon-left:after, .ui-btn-icon-right:after, .ui-btn-icon-top:after, .ui-btn-icon-bottom:after, .ui-btn-icon-notext:after {
+    background-color: transparent;
+
+}
+
+.ui-icon-bars:after {
+    background-image: none;
+}
+
+#uberguestlistTitle {
+    font-size: 32px;
+    margin-top: 5%;
+    color: #1414DA;
+    opacity: 0.6;
+    text-shadow: 1px 1px #0C0C0C;
+}
+
+#eventName {
+    font-weight: bold;
+}
+
+#eventButton {
+    border-radius: 50% !important;
+    width: 50px;
+    height: 50px;
+    font-size: 12px;
+    text-align: center;
+}
+
+#eventpasswordTitle {
+    color: gray;
+    font-size: 15px;
+}
+
 #guestlistForm{
     margin-top:10%;
 }
@@ -38,6 +113,8 @@
 
 #enterEventPass {
 	display: none;
+    margin-top:30%;
+    width: 85%;
 }
 
 #loadingPage{

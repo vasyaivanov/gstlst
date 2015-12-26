@@ -88,18 +88,64 @@ if(typeof io != "undefined") {
 		}
 	});
 
-	$("#eventButton").click(function() {
+
+	$("#eventPassword").keyup(function(event){
+	    if(event.keyCode == 13){
+	        $("#eventButton").click();
+	    }
+	});
+
+	function goToEvent() {
 		$("#loadingPage").show();
 		$("#enterEventPass").hide();
+		$("#helpPanel").hide();
 		$("#enterEventError").text("");
-		appObj.loadList();
+		appObj.loadList();	
+	}
+
+	function goHome() {
+
+		$("#eventPassword").val("");
+		$("#event").hide();
+		$("#helpPanel").hide();
+		$("#enterEventPass").show();
+	}
+
+	function showHelp() {
+		$("#helpPanel").show();
+		$("#loadingPage").hide();
+		$("#enterEventPass").hide();
+		$("#event").hide();
+		
+		appObj.loadList();		
+	}
+
+	$("#eventButton").click(function() {
+		goToEvent();		
 	});
 
 	$("#changeEventBut").click(function () {
-		$("#eventPassword").val("");
-		$("#event").hide();
-		$("#enterEventPass").show();
+		goHome();
 	});
+
+	$("#homeMenu").click(function () {
+		goHome();
+		$("#menuButton").click();
+	});
+
+	$("#helpMenu").click(function () {
+		showHelp();
+	});
+
+	$("#eventMenu").click(function () {
+		goToEvent();
+	});
+
+	
+
+	
+	
+
 
 	appObj.loadList = function() {
 		guestlistMetadata = {};
@@ -142,3 +188,5 @@ else {
 	},5000);
 }
 });
+
+

@@ -3,19 +3,19 @@
     <head>
         <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
         <meta content="utf-8" http-equiv="encoding">
-		<meta name="viewport" content="width=device-width, initial-scale=0.9, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=0.9, user-scalable=no">
         <link rel="stylesheet" href="./css/jquery.mobile-1.4.3.min.css">
         <link rel="stylesheet" href="./css/index.css">
 
-		<script src="https://www.uberguestlist.com/socket.io/socket.io.js"></script>
+        <script src="https://www.uberguestlist.com/socket.io/socket.io.js"></script>
         <script src="./js/jquery-1.10.2.min.js"></script>
-		<script>
-			$(document).bind('mobileinit',function(){
-				$.mobile.changePage.defaults.changeHash = false;
-				$.mobile.hashListeningEnabled = false;
-				$.mobile.pushStateEnabled = false;
-			});
-		</script>
+        <script>
+            $(document).bind('mobileinit',function(){
+                $.mobile.changePage.defaults.changeHash = false;
+                $.mobile.hashListeningEnabled = false;
+                $.mobile.pushStateEnabled = false;
+            });
+        </script>
         <script src="./js/jquery.mobile-1.4.3.min.js"></script>
         <script src="./js/index.js"></script>
 
@@ -23,44 +23,137 @@
     </head>
     <body>
 
-		<div id="loadingPage" class="centerText">
-			<img src="./img/loading_spinner.gif" width="100">
-		</div>
 
-		<div id="enterEventPass">
-			<h2>Event password</h2>
-			<h4 id="enterEventError" style="color: red"></h4>
-			<input id="eventPassword" type="text">
-			<button id="eventButton">Manage</button>
-		</div>
+        <div data-role="page" id="page1">
+          <div data-theme="a" data-role="header" id="pageHeader">
+            <!-- The #menu is the ID of the navigation panel element -->
+                <div style="width:100%;margin-top:1%;" id="uberguestlistTitle">
+                    <center>
+                        <div>
+                            UberGuestlist
+                        </div>
+                    </center>
+                </div>
+
+            <a id="menuButton" href="#menu" data-role="button" data-theme="c" data-rel="back" data-inline="true" data-icon="bars">
+                &#9776; <!-- Results in ☰ -->
+            </a>
+          </div>
+          <!-- This is the navigation panel that opens to show the menu -->
+          <div data-role="panel" id="menu" data-display="push">
+            <div class="ui-panel-inner">
+              <!-- This UL is the menu, where the items will be added -->
+              <!-- Make sure you don't add any <li> or any other content inside it! -->
+              <ul data-role="listview" class="mainMenu">
+                <li id="homeMenu">Home</li>
+                <li id="eventMenu">Guestlist</li>
+                <li id="helpMenu">Help</li>
+              </ul>
+            </div>
+          </div>
+          <!-- /panel -->
+          <div data-role="content">
+            
 
 
-		<div id="event">
-        <button id="changeEventBut">Change event</button>
-        <h1 id="eventName"></h1>
-        <form id="guestlistForm">
-            <input data-type="search" id="filterControlgroup-input">
-        </form>
-        <div data-role="controlgroup" data-filter="true" data-input="#filterControlgroup-input" id="guesttable">
+                <div id="loadingPage" class="centerText">
+                    <img src="./img/loading_spinner.gif" width="100">
+                </div>
+
+
+
+                <div id="helpPanel">
+                    <p>Upload your guestlist file to <a href="http://www.uberguestlist.com">www.uberguestlist.com</a></p>
+                    <p>You will be given a <b>password</b> </p>
+                    <p>Enter password in this app.</p>
+                    <p>This app is <b>global</b>: adding or marking a name on one device will mark it for everyone.</p>
+
+                </div>
+
+                <center>
+                <div id="enterEventPass">
+                    <h4 id="enterEventError" style="color: red"></h4>
+                    <div id="eventpasswordTitle">event password</div>
+                    <input id="eventPassword" type="text">
+                    <button id="eventButton">GO</button>
+                </div>
+                </center>
+
+
+                <div id="event">
+                    <button id="changeEventBut">Change event</button>
+                    <center><div id="eventName"></div></center>
+                    <form id="guestlistForm">
+                        <input data-type="search" id="filterControlgroup-input">
+                    </form>
+                    <div data-role="controlgroup" data-filter="true" data-input="#filterControlgroup-input" id="guesttable">
+                    </div>
+
+                    <center><img id="greenCheckmark" src="./img/greenCheckmark.png"/></center>
+
+
+                    <a id="popupButton" href="#popupDialog" data-rel="popup" data-position-to="window" data-role="button" data-inline="true" data-transition="pop" data-icon="delete" data-theme="b">Delete page...</a>
+                    <div id="popupDialog" data-role="popup" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
+                        <div data-role="header" data-theme="a" class="ui-corner-top">
+                        </div>
+                        <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+                            <h1 id="confirmDeleteGuestName" class="ui-title">Name</h1>
+                            <a id="cancelDeleteGuest" href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
+                            <a id="confirmDeleteGuest" href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">OK</a>
+                        </div>
+                </div>
+
+                </div>
+
+
+                <script type="text/javascript" src="cordova.js"></script>
+                <!--<script>
+                    // The Menu items and links
+                    var menu = [
+                      {
+                        title: "Home",
+                        url  : "javascript:goHome();"
+                      },
+                      {
+                        title: "Guestlist",
+                        url  : "javascript:goToEvent();"
+                      },
+                      {
+                        title: "Help",
+                        url  : "javascript:goToHelp()"
+                      }
+                    ];
+
+                    // For this "simple demo" we can change event to "pageinit", but for the more advanced features, it has to be bound to "pageshow"
+                    $(document).on("pageshow", function (event) {
+
+                      var items = '', // menu items list
+                        ul = $(".mainMenu:empty");  // get "every" mainMenu that has not yet been processed
+
+                      for (var i = 0; i < menu.length; i++) {
+                        items += '<li><a href="' + menu[i].url + '">' + menu[i].title + '</a></li>';
+                      }
+
+                      ul.append(items);
+                      ul.listview('refresh'); // use cache, as ".mainMenu:empty" will no longer work (append called!)
+
+                    });
+                </script>-->
+
+          </div>
         </div>
 
-        <center><img id="greenCheckmark" src="./img/greenCheckmark.png"/></center>
 
 
-        <a id="popupButton" href="#popupDialog" data-rel="popup" data-position-to="window" data-role="button" data-inline="true" data-transition="pop" data-icon="delete" data-theme="b">Delete page...</a>
-        <div id="popupDialog" data-role="popup" data-overlay-theme="a" data-theme="c" data-dismissible="false" style="max-width:400px;" class="ui-corner-all">
-            <div data-role="header" data-theme="a" class="ui-corner-top">
-            </div>
-            <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
-                <h1 id="confirmDeleteGuestName" class="ui-title">Name</h1>
-                <a id="cancelDeleteGuest" href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
-                <a id="confirmDeleteGuest" href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">OK</a>
-            </div>
-        </div>
-
-		</div>
 
 
-        <script type="text/javascript" src="cordova.js"></script>
+
+
+
+
+
+
+
+
     </body>
 </html>
