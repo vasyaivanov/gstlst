@@ -5,6 +5,9 @@ body{
 
 #helpPanel{
     display: none;
+    position: absolute;
+    top: 25%;
+    left: 5%;
 }
 
 ul.mainMenu li{

@@ -96,28 +96,26 @@ if(typeof io != "undefined") {
 	});
 
 	function goToEvent() {
-		$("#loadingPage").show();
+		$("#event").show;
+		$("#loadingPage").hide();
 		$("#enterEventPass").hide();
 		$("#helpPanel").hide();
-		$("#enterEventError").text("");
+		$("#enterEventError").html("");
 		appObj.loadList();	
 	}
 
 	function goHome() {
-
-		$("#eventPassword").val("");
+		//$("#eventPassword").val("");
 		$("#event").hide();
 		$("#helpPanel").hide();
 		$("#enterEventPass").show();
 	}
 
 	function showHelp() {
-		$("#helpPanel").show();
-		$("#loadingPage").hide();
 		$("#enterEventPass").hide();
 		$("#event").hide();
-		
-		appObj.loadList();		
+		$("#helpPanel").show();
+		$("#loadingPage").hide();	
 	}
 
 	$("#eventButton").click(function() {
@@ -135,10 +133,12 @@ if(typeof io != "undefined") {
 
 	$("#helpMenu").click(function () {
 		showHelp();
+		$("#menuButton").click();
 	});
 
 	$("#eventMenu").click(function () {
 		goToEvent();
+		$("#menuButton").click();
 	});
 
 	
