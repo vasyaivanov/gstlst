@@ -133,7 +133,7 @@ $(document).ready(function () {
 
 
 	mainSocket.on("uploadProgress", function (data) {
-        data.msg = "Guest list uploaded!<br>Download our <a href=\"https://itunes.com\">app</a> and enter this password <a><i>" + data.eventId + "</i></a> to manage this guest list";
+        data.msg = "<div id='guestliUploaded'>Guest list uploaded!</div><br>Download our <a href=\"https://itunes.com\">app</a> and enter password <a><span id='eventPassowrd'>" + data.eventId + "</span></a> to manage this guestlist";
         if (data.percentage >= 0) {
           data.error = false;
           updateProgress(data);
