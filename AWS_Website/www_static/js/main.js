@@ -23,7 +23,7 @@ $(document).ready(function () {
     var url = document.location.href;
     var hashPos = url.lastIndexOf('#');
     var localUrl = url.slice(hashPos + 1);
-    if (localUrl === 'upload_presentation') {
+    if (localUrl === 'upload_guestlist') {
         document.location = getClearUrl();
     }
 
@@ -58,7 +58,7 @@ $(document).ready(function () {
         progressLabel.text(title);
     }
 
-    var uploadButton  = $('#uploadPresentation'),
+    var uploadButton  = $('#uploadGuestlist'),
         progressbar   = $('#progressbar'),
         progressLabel = $('#uploadLabel');
 
@@ -68,7 +68,7 @@ $(document).ready(function () {
 
     function openUploadDialog(msg) {
         var url = getClearUrl();
-        document.location = url + "#upload_presentation";
+        document.location = url + "#upload_guestlist";
         setUploadMessage(msg);
     };
 
@@ -96,13 +96,13 @@ $(document).ready(function () {
         }
     }
 
-	
+
 	mainSocket.emit('readUserUpload', function(maxFileSize) {
-	
+
 			var siofu = new SocketIOFileUpload(mainSocket);
 			siofu.chunkSize = 0;
 			siofu.maxFileSize = maxFileSize;
-			siofu.listenOnInput(document.getElementById("uploadPresentation"));
+			siofu.listenOnInput(document.getElementById("uploadGuestlist"));
 
 			siofu.addEventListener("choose", function(event){
 				console.log("Upload file(s) chosen: " + event.files[0].name);
@@ -133,7 +133,7 @@ $(document).ready(function () {
 
 
 	mainSocket.on("uploadProgress", function (data) {
-        data.msg = "<div id='guestliUploaded'>Guest list uploaded!</div><br>Download our <a href=\"https://itunes.com\">app</a> and enter password <a><span id='eventPassowrd'>" + data.eventId + "</span></a> to manage this guestlist";
+        data.msg = "Guest list uploaded!<br>Download our <a href=\"https://itunes.com\">app</a> and enter this password <a><i>" + data.eventId + "</i></a> to manage this guest list";
         if (data.percentage >= 0) {
           data.error = false;
           updateProgress(data);
