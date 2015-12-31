@@ -100,8 +100,8 @@ if(typeof io != "undefined") {
 	});
 
 	function goToEvent() {
-		$("#event").show;
-		$("#loadingPage").hide();
+		$("#event").hide();
+		$("#loadingPage").show();
 		$("#enterEventPass").hide();
 		$("#helpPanel").hide();
 		$("#enterEventError").html("");
@@ -112,7 +112,6 @@ if(typeof io != "undefined") {
 	}
 
 	function goHome() {
-		//$("#eventPassword").val("");
 		$("#event").hide();
 		$("#helpPanel").hide();
 		$("#enterEventPass").hide();
@@ -188,6 +187,7 @@ if(typeof io != "undefined") {
 						$(".ui-controlgroup-controls ").append(guest);
 					}
 				}
+				$("#loadingPage").hide();
 				$("#event").show();
 			}
 		});
