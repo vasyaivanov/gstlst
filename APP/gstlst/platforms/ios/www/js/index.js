@@ -1,4 +1,5 @@
 var appObj = new Object();
+appObj.connected = 0;
 
 $( document ).ready(function() {
 if(typeof io != "undefined") {
@@ -61,6 +62,7 @@ if(typeof io != "undefined") {
 		if($("#eventPassword").val() == "") {
 			$("#loadingPage").hide();
 			$("#enterEventPass").show();
+			appObj.connected = 1;
 		}
 	});
 
@@ -70,12 +72,14 @@ if(typeof io != "undefined") {
 		$("#event").hide();
 		$("#enterEventPass").hide();
 		$("#loadingPage").show();
+		appObj.connected = 0;
 	});
 
 
 	socket.on("reconnect", function(err) {
 		console.log("Reconnected");
 		if($("#eventPassword").val() != "") {
+			appObj.connected = 1;
 			appObj.loadList();
 		}
 	});
@@ -101,25 +105,34 @@ if(typeof io != "undefined") {
 		$("#enterEventPass").hide();
 		$("#helpPanel").hide();
 		$("#enterEventError").html("");
-		appObj.loadList();	
+		if(appObj.connected == 0) {
+			$("#loadingPage").show();
+		}
+		appObj.loadList();
 	}
 
 	function goHome() {
 		//$("#eventPassword").val("");
 		$("#event").hide();
 		$("#helpPanel").hide();
-		$("#enterEventPass").show();
+		$("#enterEventPass").hide();
+		if(appObj.connected == 0) {
+			$("#loadingPage").show();
+		}
+		else {
+			$("#enterEventPass").show();
+		}
 	}
 
 	function showHelp() {
 		$("#enterEventPass").hide();
 		$("#event").hide();
 		$("#helpPanel").show();
-		$("#loadingPage").hide();	
+		$("#loadingPage").hide();
 	}
 
 	$("#eventButton").click(function() {
-		goToEvent();		
+		goToEvent();
 	});
 
 	$("#changeEventBut").click(function () {
@@ -141,10 +154,10 @@ if(typeof io != "undefined") {
 		$("#menuButton").click();
 	});
 
-	
 
-	
-	
+
+
+
 
 
 	appObj.loadList = function() {
@@ -188,5 +201,3 @@ else {
 	},5000);
 }
 });
-
-
