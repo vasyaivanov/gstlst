@@ -29,17 +29,29 @@ ul.mainMenu li{
     border-style: none;
     border-color: none;
     background: none;
-    height: 15px;
-
     border-style: none;
     border-bottom: none;
     margin: 0px;
     padding: 0px;
-    font-size: 23px;
-    height: 24px;
+    font-size: 36px;
+    text-align: center;
+    vertical-align: middle;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
     background: none;
     background-image: none;
     padding: 1px;
+}
+
+#menu{
+    font-size: 22px;
+}
+
+#uberguestlistlogo{
+    width: 80%;
+    margin-left: 19%;
+    margin-top: 2%;
 }
 
 .ui-btn-icon-left:after, .ui-btn-icon-right:after, .ui-btn-icon-top:after, .ui-btn-icon-bottom:after, .ui-btn-icon-notext:after {
@@ -65,15 +77,16 @@ ul.mainMenu li{
 
 #eventButton {
     border-radius: 50% !important;
-    width: 50px;
-    height: 50px;
-    font-size: 12px;
+    width: 75px;
+    height: 75px;
+    font-size: 20px;
     text-align: center;
+    margin-top: 20px;
 }
 
 #eventpasswordTitle {
     color: gray;
-    font-size: 15px;
+    font-size: 18px;
 }
 
 #guestlistForm{
@@ -117,7 +130,8 @@ ul.mainMenu li{
 #enterEventPass {
 	display: none;
     margin-top:30%;
-    width: 85%;
+    width: 95%;
+    font-size: 26px;
 }
 
 #loadingPage{
