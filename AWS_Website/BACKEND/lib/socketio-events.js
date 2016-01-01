@@ -53,14 +53,14 @@ module.parent.exports.io.use(function (socket, next) {
 module.parent.exports.io.sockets.on('connection', function (socket) {
     if(typeof module.parent.exports.UserData  !== "undefined") {
       var userSession = module.parent.exports.UserData[module.parent.exports.getCookie(socket.handshake.headers.cookie,module.parent.exports.sessionIdCookie)];
-	  
+
 	  if(typeof userSession == "undefined") {
 		  // Look like we have an App session
 		  userSession = {};
 		  userSession.restrictions = {};
 		  userSession.restrictions.maxListSize = 0;
 	  }
-	  
+
       if(typeof userSession !== "undefined") {
           console.log('SOCKET CONNECTION on', new Date().toLocaleTimeString() + ' Addr: ' + socket.handshake.headers.host + ' Socket: ' + socket.id + ' UserAgent:' + socket.handshake.headers['user-agent']);
           console.log('--------------');
@@ -103,7 +103,7 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
 		  socket.emit("listUploadError", data);
 		}
 
-		
+
 		function uploadComplete(name, origName) {
 			console.log("Uploaded");
 			  var listParams = {
@@ -121,7 +121,7 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
 				  }
 				  else {
 					console.log("Hash created: " + eventHash);
-					var converter = new csvConverter({});
+					var converter = new csvConverter({noheader:true, headers:["Name"]});
 					converter.fromFile(name,function(err,result){
 						var operc = (100 / result.length);
 						var insertEvent = new module.parent.exports.Event({eventId: eventHash, name: origName});
@@ -132,10 +132,14 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
 							}
 							else {
 								for(var res in result){
+                  var Name = result[res].Name;
+                  delete result[res].Name;
 									socket.emit('uploadProgress', {percentage: Math.floor(operc*res)})
-									var insertData = new module.parent.exports.Guests({Name: result[res].Name, Status: result[res].Status, eventId: eventHash});
-									insertData.save(function(err, saved) {});
-									
+									var insertData = new module.parent.exports.Guests({Name: Name, Params: result[res], eventId: eventHash});
+									insertData.save(function(err, saved) {
+                    if(err) console.log(err);
+                  });
+
 									if(res == result.length - 1) {
 										socket.emit('uploadProgress', {percentage: 100, eventId: eventHash})
 									}
@@ -185,20 +189,20 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
 		uploader.on("error", function (event) {
 			uploadError(0, JSON.stringify(event));
 		});
-				
+
 
 		socket.on('error', function (data){
 			console.error(data);
 		});
-		
+
       	socket.on('readUserUpload', function (callback) {
       		callback(userSession.restrictions.maxListSize);
         });
-		
+
       	socket.on('getEvent', function (data, callback) {
 			module.parent.exports.checkEvent(data.eventId, function(ret) {
 				if(ret.found == 1) {
-					module.parent.exports.Guests.find({eventId: data.eventId, Status: "Going", marked: 0}).sort({'Name': 'asc'}).exec(function(err, docs) {
+					module.parent.exports.Guests.find({eventId: data.eventId, marked: 0}).sort({'Name': 'asc'}).exec(function(err, docs) {
 						callback({code: 0, guests: docs, name: ret.name});
 					});
 				}
@@ -207,7 +211,7 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
 				}
 			});
         });
-		
+
       	socket.on('markGuest', function (data, callback) {
 			module.parent.exports.checkEvent(data.eventId, function(ret) {
 				if(ret.found == 1) {
@@ -232,7 +236,7 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
 					callback({code: 1});
 				}
 			});
-        });	
+        });
 
       }
     }
