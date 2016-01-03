@@ -108,7 +108,9 @@ if(typeof io != "undefined") {
 		if(appObj.connected == 0) {
 			$("#loadingPage").show();
 		}
-		appObj.loadList();
+        else {
+            appObj.loadList();
+        }
 	}
 
 	function goHome() {
