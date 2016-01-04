@@ -1,6 +1,15 @@
 var appObj = new Object();
 appObj.connected = 0;
 
+Storage.prototype.setObject = function(key, value) {
+    this.setItem(key, JSON.stringify(value));
+}
+
+Storage.prototype.getObject = function(key) {
+    var value = this.getItem(key);
+    return value && JSON.parse(value);
+}
+
 $( document ).ready(function() {
 if(typeof io != "undefined") {
 	var socket = io.connect("https://www.uberguestlist.com/");
@@ -63,6 +72,11 @@ if(typeof io != "undefined") {
 			$("#loadingPage").hide();
 			$("#enterEventPass").show();
 			appObj.connected = 1;
+			if(localStorage.getItem("lastEvent")) {
+				console.log(localStorage)
+				$("#eventPassword").val(localStorage.getItem("lastEvent"));
+				goToEvent();
+			}
 		}
 	});
 
@@ -108,12 +122,13 @@ if(typeof io != "undefined") {
 		if(appObj.connected == 0) {
 			$("#loadingPage").show();
 		}
-        else {
-            appObj.loadList();
-        }
+    else {
+    	appObj.loadList();
+    }
 	}
 
 	function goHome() {
+		localStorage.clear();
 		$("#event").hide();
 		$("#helpPanel").hide();
 		$("#enterEventPass").hide();
@@ -155,12 +170,6 @@ if(typeof io != "undefined") {
 		$("#menuButton").click();
 	});
 
-
-
-
-
-
-
 	appObj.loadList = function() {
 		guestlistMetadata = {};
 		$(".ui-controlgroup-controls").empty();
@@ -173,6 +182,7 @@ if(typeof io != "undefined") {
 				$("#enterEventError").text("Event wasn't found");
 			}
 			else {
+				localStorage.setItem("lastEvent",$("#eventPassword").val().toLowerCase());
 				guestlistMetadata = {
 					eventName: eventData.name,
 					guests: eventData.guests
