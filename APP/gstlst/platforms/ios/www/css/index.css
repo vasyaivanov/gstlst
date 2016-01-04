@@ -3,6 +3,10 @@ body{
     font-family: "Source Sans Pro","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
+#filterControlgroup-input{
+    font-size: 30px;
+}
+
 #helpPanel{
     display: none;
     position: absolute;

@@ -147,6 +147,14 @@ if(typeof io != "undefined") {
 		$("#loadingPage").hide();
 	}
 
+	function addGuest(){
+
+	}
+
+	function removeGuest(){
+		
+	}
+
 	$("#eventButton").click(function() {
 		goToEvent();
 	});
@@ -169,6 +177,17 @@ if(typeof io != "undefined") {
 		goToEvent();
 		$("#menuButton").click();
 	});
+
+	$("#addGuestMenu").click(function () {
+		addGuest();
+		$("#menuButton").click();
+	});
+
+	$("#removeGuestMenu").click(function () {
+		removeGuest();
+		$("#menuButton").click();
+	});
+
 
 	appObj.loadList = function() {
 		guestlistMetadata = {};
