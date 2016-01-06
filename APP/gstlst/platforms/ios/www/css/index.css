@@ -3,6 +3,11 @@ body{
     font-family: "Source Sans Pro","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
+.whiteTextColor{
+    color: white;
+    background-color: green;
+}
+
 #filterControlgroup-input{
     font-size: 30px;
 }
@@ -12,6 +17,11 @@ body{
     position: absolute;
     top: 25%;
     left: 5%;
+}
+
+#popupDialog{
+    color: black;
+    font-size: 20px;
 }
 
 ul.mainMenu li{

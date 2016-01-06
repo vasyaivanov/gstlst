@@ -147,6 +147,13 @@ if(typeof io != "undefined") {
 		$("#loadingPage").hide();
 	}
 
+	 $( ".ui-controlgroup-controls" ).on( "swipe", swipeHandler );
+  	function swipeHandler( event ){
+  		//alert("JD: event target: " + $( event.target ).html());
+    	$( event.target ).html("");
+    	removeGuest();
+	}
+
 	function addGuest(){
 
 	}

@@ -49,7 +49,7 @@
                 <li id="homeMenu">Home</li>
                 <li id="eventMenu">Guestlist</li>
                 <li id="addGuestMenu">Add Guest</li>
-                <li id="removeGuestMenu">Remove Guest</li>
+                <li><a href="#deleteUserHelp" style='background-color: transparent' data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="pop">Delete Guest</a></li>
                 <li id="helpMenu">Help</li>
               </ul>
             </div>
@@ -74,14 +74,28 @@
                     </ul>
                 </div>
 
-                <center>
+            
                 <div id="enterEventPass">
-                    <h4 id="enterEventError" style="color: red"></h4>
-                    <div id="eventpasswordTitle">event password</div>
-                    <input id="eventPassword" type="text">
-                    <button id="eventButton">GO</button>
+                    <center>
+                        <h4 id="enterEventError" style="color: red"></h4>
+                        <div id="eventpasswordTitle">event password</div>
+                        <input id="eventPassword" type="text">
+                        <button id="eventButton">GO</button>
+
+                        <div style='position:fixed;bottom:20px;left:0px;'>
+                            <div data-role="popup" id="deleteUserHelp" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
+                                <div data-role="header" data-theme="a">
+                                <h1>Help</h1>
+                                </div>
+                                <div role="main" class="ui-content">
+                                    <p style='color-black; font-weight:normal;'>In order to delete a user please go to Guestlist and swipe right</p>
+                                    <center><a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back">OK</a></center>
+                                </div>
+                            </div>
+                        </div>
+                    </center>
                 </div>
-                </center>
+            
 
 
                 <div id="event">
@@ -104,47 +118,19 @@
                             <a id="cancelDeleteGuest" href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
                             <a id="confirmDeleteGuest" href="#" data-role="button" data-inline="true" data-rel="back" data-transition="flow" data-theme="b">OK</a>
                         </div>
-                </div>
+                    </div>
+
+                    
 
                 </div>
 
 
                 <script type="text/javascript" src="cordova.js"></script>
-                <!--<script>
-                    // The Menu items and links
-                    var menu = [
-                      {
-                        title: "Home",
-                        url  : "javascript:goHome();"
-                      },
-                      {
-                        title: "Guestlist",
-                        url  : "javascript:goToEvent();"
-                      },
-                      {
-                        title: "Help",
-                        url  : "javascript:goToHelp()"
-                      }
-                    ];
-
-                    // For this "simple demo" we can change event to "pageinit", but for the more advanced features, it has to be bound to "pageshow"
-                    $(document).on("pageshow", function (event) {
-
-                      var items = '', // menu items list
-                        ul = $(".mainMenu:empty");  // get "every" mainMenu that has not yet been processed
-
-                      for (var i = 0; i < menu.length; i++) {
-                        items += '<li><a href="' + menu[i].url + '">' + menu[i].title + '</a></li>';
-                      }
-
-                      ul.append(items);
-                      ul.listview('refresh'); // use cache, as ".mainMenu:empty" will no longer work (append called!)
-
-                    });
-                </script>-->
 
           </div>
         </div>
+
+    
 
 
     </body>
