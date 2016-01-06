@@ -313,9 +313,14 @@ background: linear-gradient(to bottom right, #02107B 10%, #0062DA 90%);; /* Stan
 #uploadLabel {
     font-weight: bold;
     color: #337ab7;
-    font-size: 2vh;
+    font-size: 28px;
+    text-align: center;
     margin-top: 0px;
     text-align: center;
+}
+
+#displayedPassword {
+    font-size: 32px;
 }
 
 /*
