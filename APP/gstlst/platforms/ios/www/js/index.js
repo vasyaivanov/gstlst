@@ -149,8 +149,8 @@ if(typeof io != "undefined") {
 
 	 $( ".ui-controlgroup-controls" ).on( "swipe", swipeHandler );
   	function swipeHandler( event ){
-  		//alert("JD: event target: " + $( event.target ).html());
-    	$( event.target ).html("");
+        // Remove from the list (Fake :)
+        appObj.removeFromList(event.target.id,0);
     	removeGuest();
 	}
 
