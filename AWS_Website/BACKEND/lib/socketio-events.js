@@ -208,7 +208,7 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
                 guestList.then(function(docs) {
                   totalRecords.then(function(total) {
                     markedRecords.then(function(marked) {
-                        callback({code: 0, guests: docs, name: ret.name, total: total, marked: marked});
+                        callback({code: 0, guests: docs, name: ret.name, total: total, marked: marked + ret.count});
                     });
                   });
                 });
@@ -266,10 +266,28 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
               var insertEvent = new module.parent.exports.Guests({eventId: data.eventId, Name: data.guestName});
               insertEvent.save(function(err, saved) {
                 if(err) {callback({code: 1, err: err});}
-                else {callback({code: 0, _id: saved._id, name: saved.Name})}
+                else {
+                  socket.broadcast.emit('addedUser', {eventId: data.eventId , _id: saved._id, name: saved.Name});
+                  callback({code: 0, _id: saved._id, name: saved.Name})
+                }
               });
     				}
     			});
+        });
+
+        socket.on('addMarked', function (data, callback) {
+          module.parent.exports.checkEvent(data.eventId, function(ret) {
+            console.log(ret);
+            if(ret.found == 1) {
+              module.parent.exports.Event.update({eventId: data.eventId },{$set: {addCount: ret.count+1 }}, function(err,updated) {
+                  if(!err) {
+                    socket.broadcast.emit('markedAdded', {eventId: data.eventId});
+                    callback({code: 0});
+                  }
+                  else {callback({code: 1})}
+              });
+            }
+          });
         });
 
       }

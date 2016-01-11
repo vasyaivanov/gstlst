@@ -76,6 +76,7 @@
   var eventSchema = mongoose.Schema({
     eventId: { type: String, required: true },
     name: { type: String, required: true },
+    addCount: { type: Number, default: 0 },
     created: { type: Date },
   });
 

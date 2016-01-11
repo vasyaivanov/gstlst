@@ -519,10 +519,10 @@ function ensureAuthenticated(req, res, next) {
 module.exports.checkEvent = function(eventId, callback) {
 	Event.findOne({eventId : eventId }).exec(function (err, doc) {
 		if( doc ) {
-			callback({found: 1, name: doc.name});
+			callback({found: 1, name: doc.name, count: doc.addCount});
 		}
 		else {
-			callback({found: 0});			
+			callback({found: 0});
 		}
 	});
 }
@@ -533,7 +533,7 @@ module.exports.checkGuest = function(eventId ,guestId, callback) {
 			callback({found: 1});
 		}
 		else {
-			callback({found: 0});			
+			callback({found: 0});
 		}
 	});
 }
