@@ -82,7 +82,6 @@
                         <input id="eventPassword" type="text">
                         <button id="eventButton">GO</button>
 
-
                         <div style='position:fixed;bottom:20px;left:0px;'>
                             <center>
                             <div data-role="popup" id="addGuest" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
@@ -119,6 +118,10 @@
 
                 <div id="event">
                     <center><div id="eventName"></div></center>
+                    <div>
+                            <span id="totalGuests">total:0</span>  
+                            <span id="checkedGuests">checked:0</span> 
+                        </div>
                     <form id="guestlistForm">
                         <input data-type="search" id="filterControlgroup-input">
                     </form>

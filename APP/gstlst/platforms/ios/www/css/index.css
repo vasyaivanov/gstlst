@@ -120,6 +120,15 @@ ul.mainMenu li{
 
 #guestlistForm{
     margin-top:10%;
+    clear: both;
+}
+
+#totalGuests{
+    float: left;
+}
+
+#checkedGuests{
+    float: right;
 }
 
 .ui-btn{
