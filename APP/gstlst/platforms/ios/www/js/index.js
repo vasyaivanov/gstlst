@@ -13,8 +13,8 @@ Storage.prototype.getObject = function(key) {
 
 $( document ).ready(function() {
 if(typeof io != "undefined") {
-	var socket = io.connect("https://www.uberguestlist.com/");
-	//var socket = io.connect("http://www.ugl.loc/");
+	//var socket = io.connect("https://www.uberguestlist.com/");
+  var socket = io.connect("http://www.ugl.loc/");
 	var guestlistMetadata = {};
 
 	// Functionality: hiding list before the orginized enters guest's name
@@ -43,18 +43,28 @@ if(typeof io != "undefined") {
 	}
 
 	appObj.markGuest = function(guestId, guestName){
-			for (i = 0; i < guestlistMetadata.guests.length; i++) {
-				if(guestId == guestlistMetadata.guests[i].fakeid) {
-					// Send socket to remove
-					console.log("Guest was found")
-					socket.emit("markGuest", {eventId: $("#eventPassword").val().toLowerCase(), guestId: guestlistMetadata.guests[i]._id }, function(data) {
-						if(data.code == 0) {
-							appObj.removeFromList(guestId,1);
-						}
-					});
+    if(appObj.findGuestId(guestId)) {
+			socket.emit("markGuest", {eventId: localStorage.getItem("lastEvent"), guestId: appObj.findGuestId(guestId) }, function(data) {
+				if(data.code == 0) {
+          appObj.changeOnlineStats(2,1);
+					appObj.removeFromList(guestId,1);
 				}
-			}
+			});
+		}
 	}
+
+  appObj.findGuestId = function(gId) {
+    for (i = 0; i < guestlistMetadata.guests.length; i++) {
+      if(typeof guestlistMetadata.guests[i] != "undefined") {
+        if(gId == guestlistMetadata.guests[i].fakeid && guestlistMetadata.guests[i].eventId == localStorage.getItem("lastEvent")) {
+          return guestlistMetadata.guests[i]._id;
+        }
+        else if(gId == guestlistMetadata.guests[i]._id && guestlistMetadata.guests[i].eventId == localStorage.getItem("lastEvent")) {
+          return guestlistMetadata.guests[i].fakeid;
+        }
+      }
+    }
+  }
 
 	appObj.removeFromList = function(guestId,showMark) {
 		var id = "#" + guestId;
@@ -64,8 +74,21 @@ if(typeof io != "undefined") {
 				function() {setTimeout(function(){ $( "#greenCheckmark" ).hide(); }, 1000);
 			});
 		}
-		$("#cancelDeleteGuest").click();
 	}
+
+  appObj.addNewGuest = function(data) {
+    var nextKey = guestlistMetadata.guests.length + 1;
+    guestlistMetadata.guests[nextKey] = {};
+    guestlistMetadata.guests[nextKey]._id = data._id;
+    guestlistMetadata.guests[nextKey].Name = data.name;
+    guestlistMetadata.guests[nextKey].fakeid = Math.floor(Math.random() * (9999999 - 1111111) + 1111111);
+    guestlistMetadata.guests[nextKey].eventId = localStorage.getItem("lastEvent");
+    guestlistMetadata.guests[nextKey].marked = 0;
+    appObj.changeOnlineStats(1,1);
+    var guest= $('<a id="'+ guestlistMetadata.guests[nextKey].fakeid +'" href="#" class="ui-btn ui-shadow ui-corner-all" onclick="appObj.guestClicked(\'' + guestlistMetadata.guests[nextKey].fakeid + '\',\''+ guestlistMetadata.guests[nextKey].Name + '\')">' + guestlistMetadata.guests[nextKey].Name + '</a>');
+    $(".ui-controlgroup-controls ").append(guest);
+
+  }
 
 	// Show pass windows if server is online
 	socket.on("connect", function(err) {
@@ -101,12 +124,28 @@ if(typeof io != "undefined") {
 	});
 
 	socket.on("markedUser", function(data) {
-		for (i = 0; i < guestlistMetadata.guests.length; i++) {
-			if(data.guestId == guestlistMetadata.guests[i]._id && data.eventId == guestlistMetadata.guests[i].eventId) {
-				appObj.removeFromList(guestlistMetadata.guests[i].fakeid,0);
-			}
-		}
+    if(appObj.findGuestId(data.guestId)) {
+      appObj.changeOnlineStats(2,1);
+      appObj.removeFromList(appObj.findGuestId(data.guestId),0);
+    }
 	});
+
+  socket.on("removedUser", function(data) {
+    if(appObj.findGuestId(data.guestId)) {
+      appObj.changeOnlineStats(1,-1);
+      appObj.removeFromList(appObj.findGuestId(data.guestId),0);
+    }
+  });
+
+  socket.on("addedUser", function(data) {
+      appObj.addNewGuest(data);
+  });
+
+  socket.on("markedAdded", function(data) {
+      if(data.eventId == localStorage.getItem("lastEvent")) {
+        appObj.changeOnlineStats(2,1);
+      }
+  });
 
 
 	$("#eventPassword").keyup(function(event){
@@ -152,18 +191,53 @@ if(typeof io != "undefined") {
 
 	 $( ".ui-controlgroup-controls" ).on( "swipe", swipeHandler );
   	function swipeHandler( event ){
-        // Remove from the list (Fake :)
-        appObj.removeFromList(event.target.id,0);
-    	removeGuest();
+    	removeGuest(event.target.id);
 	}
 
 	function addGuest(){
+    var newGName = $("#addGuestName").val();
+    newGName = newGName.replace(/[^a-zA-Z0-9]/g, '');
+    if(newGName && localStorage.getItem("lastEvent")) {
+      $('#addGuestButton').prop('disabled', true);
+      socket.emit("addGuest", {eventId: localStorage.getItem("lastEvent"), guestName: newGName }, function(data) {
+        if(data.code == 0) {
+          $("#addNewGuestError").hide();
+          $('#addGuestButton').prop('disabled', false);
+          appObj.addNewGuest(data);
+          $("#cancelDeleteGuest").click();
+        }
+        else {
+
+          $("#addNewGuestError").show().text("This guest was found in DB");
+          $('#addGuestButton').prop('disabled', false);
+        }
+      });
+    }
+	}
+
+	function removeGuest(id){
+    console.log("REMOVING");
+    if(appObj.findGuestId(id)) {
+      socket.emit("removeGuest", {eventId: localStorage.getItem("lastEvent"), guestId: appObj.findGuestId(id) }, function(data) {
+        if(data.code == 0) {
+          appObj.changeOnlineStats(1,-1);
+          appObj.removeFromList(id,0);
+        }
+      });
+
+    }
 
 	}
 
-	function removeGuest(){
-
-	}
+  $("#addCheckedGuestNumberButton").click(function() {
+    if(appObj.connected == 1) {
+      socket.emit("addMarked", {eventId: localStorage.getItem("lastEvent") }, function(data) {
+        if(data.code == 0) {
+          appObj.changeOnlineStats(2,1);
+        }
+      });
+    }
+  });
 
 	$("#eventButton").click(function() {
 		goToEvent();
@@ -189,7 +263,6 @@ if(typeof io != "undefined") {
 	});
 
 	$("#addGuestMenu").click(function () {
-		addGuest();
 		$("#menuButton").click();
 	});
 
@@ -200,10 +273,17 @@ if(typeof io != "undefined") {
 
 	$("#addGuestButton").click(function () {
 		addGuest();
-		$("#menuButton").click();
 	});
 
-
+  appObj.changeOnlineStats = function(type,val) {
+      var selName = (type == 1) ? "totalGuests" : "checkedGuests";
+      if(val == 1) {
+        $("#" + selName).text(parseInt($("#" + selName).text()) + 1);
+      }
+      else if(val == -1) {
+        $("#" + selName).text(parseInt($("#" + selName).text()) - 1);
+      }
+  }
 
 	appObj.loadList = function() {
 		guestlistMetadata = {};
@@ -222,7 +302,8 @@ if(typeof io != "undefined") {
 					eventName: eventData.name,
 					guests: eventData.guests
 				};
-        $("#totalGuests").text("total:" + eventData.guests.length);
+        $("#totalGuests").text(eventData.total);
+        $("#checkedGuests").text(eventData.marked);
 				$("#eventName").html(guestlistMetadata.eventName);
 				if(guestlistMetadata && guestlistMetadata.guests && guestlistMetadata.guests.length>0){
 					var guests = guestlistMetadata.guests;

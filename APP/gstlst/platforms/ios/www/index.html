@@ -90,6 +90,7 @@
                                 </div>
                                 <div role="main" class="ui-content">
                                     <center>
+                                        <h4 id="addNewGuestError" style="color: red"></h4>
                                         <div id="addGuestTitle">New guest name</div>
                                         <input id="addGuestName" type="text">
                                         <button id="addGuestButton" data-rel="back">GO</button>
@@ -119,9 +120,9 @@
                 <div id="event">
                     <center><div id="eventName"></div></center>
                     <div>
-                            <span id="totalGuests">total:0</span>
+                            <div>total: <span id="totalGuests">0</span></div>
+                            <div>checked: <span id="checkedGuests">0</span></div>
                             <button id="addCheckedGuestNumberButton" data-rel="back">+1</button>
-                            <span id="checkedGuests">checked:0</span>
                         </div>
                     <form id="guestlistForm">
                         <input data-type="search" id="filterControlgroup-input">

@@ -132,15 +132,6 @@ ul.mainMenu li{
     clear: both;
 }
 
-#totalGuests{
-    float: left;
-}
-
-#checkedGuests{
-    float: right;
-    margin-right: 10px;
-}
-
 .ui-btn{
     text-align: left;
     font-size: 22px;
