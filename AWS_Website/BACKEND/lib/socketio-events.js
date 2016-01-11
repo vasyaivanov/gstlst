@@ -200,42 +200,76 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
         });
 
       	socket.on('getEvent', function (data, callback) {
-			module.parent.exports.checkEvent(data.eventId, function(ret) {
-				if(ret.found == 1) {
-					module.parent.exports.Guests.find({eventId: data.eventId, marked: 0}).sort({'Name': 'asc'}).exec(function(err, docs) {
-						callback({code: 0, guests: docs, name: ret.name});
-					});
-				}
-				else {
-					callback({code: 1});
-				}
-			});
+      		module.parent.exports.checkEvent(data.eventId, function(ret) {
+      				if(ret.found == 1) {
+                var guestList = module.parent.exports.Guests.find({eventId: data.eventId, marked: 0}).sort({'Name': 'asc'});
+                var totalRecords = module.parent.exports.Guests.count({eventId: data.eventId});
+                var markedRecords = module.parent.exports.Guests.count({eventId: data.eventId, marked: 1});
+                guestList.then(function(docs) {
+                  totalRecords.then(function(total) {
+                    markedRecords.then(function(marked) {
+                        callback({code: 0, guests: docs, name: ret.name, total: total, marked: marked});
+                    });
+                  });
+                });
+      				}
+      				else {
+      					callback({code: 1});
+      				}
+      			});
         });
 
       	socket.on('markGuest', function (data, callback) {
-			module.parent.exports.checkEvent(data.eventId, function(ret) {
-				if(ret.found == 1) {
-					module.parent.exports.checkGuest(data.eventId, data.guestId, function(res) {
-						if(res.found == 1) {
-							module.parent.exports.Guests.update({eventId: data.eventId , _id: data.guestId},{$set: {marked: 1}}, function(err,updated) {
-								if(err) {
-									callback({code: 1});
-								}
-								else {
-									socket.broadcast.emit('markedUser', {eventId: data.eventId ,guestId: data.guestId});
-									callback({code: 0});
-								}
-							});
-						}
-						else {
-							callback({code: 1});
-						}
-					});
-				}
-				else {
-					callback({code: 1});
-				}
-			});
+    			module.parent.exports.checkEvent(data.eventId, function(ret) {
+    				if(ret.found == 1) {
+    					module.parent.exports.checkGuest(data.eventId, data.guestId, function(res) {
+    						if(res.found == 1) {
+    							module.parent.exports.Guests.update({eventId: data.eventId , _id: data.guestId},{$set: {marked: 1}}, function(err,updated) {
+    								if(err) {
+    									callback({code: 1});
+    								}
+    								else {
+    									socket.broadcast.emit('markedUser', {eventId: data.eventId ,guestId: data.guestId});
+    									callback({code: 0});
+    								}
+    							});
+    						}
+    						else {
+    							callback({code: 1});
+    						}
+    					});
+    				}
+    				else {
+    					callback({code: 1});
+    				}
+    			});
+        });
+
+        socket.on('removeGuest', function (data, callback) {
+    			module.parent.exports.checkEvent(data.eventId, function(ret) {
+    				if(ret.found == 1) {
+    					module.parent.exports.checkGuest(data.eventId, data.guestId, function(res) {
+    						if(res.found == 1) {
+    							module.parent.exports.Guests.remove({eventId: data.eventId , _id: data.guestId}, function(err) {
+                    socket.broadcast.emit('removedUser', {eventId: data.eventId ,guestId: data.guestId});
+                    callback({code: 0});
+    							});
+    						}
+    					});
+    				}
+    			});
+        });
+
+        socket.on('addGuest', function (data, callback) {
+    			module.parent.exports.checkEvent(data.eventId, function(ret) {
+    				if(ret.found == 1) {
+              var insertEvent = new module.parent.exports.Guests({eventId: data.eventId, Name: data.guestName});
+              insertEvent.save(function(err, saved) {
+                if(err) {callback({code: 1, err: err});}
+                else {callback({code: 0, _id: saved._id, name: saved.Name})}
+              });
+    				}
+    			});
         });
 
       }
