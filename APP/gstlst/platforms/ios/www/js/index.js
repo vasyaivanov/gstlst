@@ -195,6 +195,12 @@ if(typeof io != "undefined") {
 		$("#menuButton").click();
 	});
 
+	$("#addGuestButton").click(function () {
+		addGuest();
+		$("#menuButton").click();
+	});
+
+
 
 	appObj.loadList = function() {
 		guestlistMetadata = {};

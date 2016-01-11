@@ -98,7 +98,22 @@ ul.mainMenu li{
     margin-top: 20px;
 }
 
+#addGuestButton {
+        border-radius: 50% !important;
+    width: 75px;
+    height: 75px;
+    font-size: 20px;
+    text-align: center;
+    margin-top: 20px;
+
+}
+
 #eventpasswordTitle {
+    color: gray;
+    font-size: 18px;
+}
+
+#addGuestTitle {
     color: gray;
     font-size: 18px;
 }

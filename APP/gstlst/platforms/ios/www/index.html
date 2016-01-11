@@ -48,8 +48,8 @@
               <ul data-role="listview" class="mainMenu">
                 <li id="homeMenu">Home</li>
                 <li id="eventMenu">Guestlist</li>
-                <li id="addGuestMenu">Add Guest</li>
-                <li><a href="#deleteUserHelp" style='background-color: transparent' data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="pop">Delete Guest</a></li>
+                <li id="addGuestMenu"><a href="#addGuest" style='background-color: transparent' data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="pop">Add Guest</a></li>
+                <!--<li><a href="#deleteUserHelp" style='background-color: transparent' data-rel="popup" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="pop">Delete Guest</a></li>-->
                 <li id="helpMenu">Help</li>
               </ul>
             </div>
@@ -81,6 +81,25 @@
                         <div id="eventpasswordTitle">event password</div>
                         <input id="eventPassword" type="text">
                         <button id="eventButton">GO</button>
+
+
+                        <div style='position:fixed;bottom:20px;left:0px;'>
+                            <center>
+                            <div data-role="popup" id="addGuest" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
+                                <div data-role="header" data-theme="a">
+                                <h1>Add Guest</h1>
+                                </div>
+                                <div role="main" class="ui-content">
+                                    <center>
+                                        <div id="addGuestTitle">New guest name</div>
+                                        <input id="addGuestName" type="text">
+                                        <button id="addGuestButton" data-rel="back">GO</button>
+                                        <a id="cancelDeleteGuest" href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
+                                    </center>
+                                </div>
+                            </div>
+                        </center>
+                        </div>
 
                         <div style='position:fixed;bottom:20px;left:0px;'>
                             <div data-role="popup" id="deleteUserHelp" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
