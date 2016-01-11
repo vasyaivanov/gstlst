@@ -1,5 +1,6 @@
 var appObj = new Object();
 appObj.connected = 0;
+appObj.listLoaded = 0;
 
 Storage.prototype.setObject = function(key, value) {
     this.setItem(key, JSON.stringify(value));
@@ -27,6 +28,7 @@ if(typeof io != "undefined") {
 		}
 	});*/
 
+  $("#addGuestMenu").hide();
 	appObj.guestClicked = function (guestId, guestName){
 
 		/*var id = "#" + guestId;
@@ -121,14 +123,15 @@ if(typeof io != "undefined") {
 		$("#enterEventError").html("");
 		if(appObj.connected == 0) {
 			$("#loadingPage").show();
-		}
-    else {
-    	appObj.loadList();
-    }
+        }
+        else {
+            appObj.loadList();
+        }
 	}
 
 	function goHome() {
 		localStorage.clear();
+    $("#addGuestMenu").hide();
 		$("#event").hide();
 		$("#helpPanel").hide();
 		$("#enterEventPass").hide();
@@ -159,7 +162,7 @@ if(typeof io != "undefined") {
 	}
 
 	function removeGuest(){
-		
+
 	}
 
 	$("#eventButton").click(function() {
@@ -219,6 +222,7 @@ if(typeof io != "undefined") {
 					eventName: eventData.name,
 					guests: eventData.guests
 				};
+        $("#totalGuests").text("total:" + eventData.guests.length);
 				$("#eventName").html(guestlistMetadata.eventName);
 				if(guestlistMetadata && guestlistMetadata.guests && guestlistMetadata.guests.length>0){
 					var guests = guestlistMetadata.guests;
@@ -231,8 +235,10 @@ if(typeof io != "undefined") {
 						$(".ui-controlgroup-controls ").append(guest);
 					}
 				}
+
 				$("#loadingPage").hide();
 				$("#event").show();
+        $("#addGuestMenu").show();
 			}
 		});
 	}
