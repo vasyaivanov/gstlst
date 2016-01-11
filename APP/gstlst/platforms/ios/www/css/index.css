@@ -99,13 +99,22 @@ ul.mainMenu li{
 }
 
 #addGuestButton {
-        border-radius: 50% !important;
+    border-radius: 50% !important;
     width: 75px;
     height: 75px;
     font-size: 20px;
     text-align: center;
     margin-top: 20px;
+}
 
+#addCheckedGuestNumberButton {
+    float: right;
+    margin-top: -10px;
+    border-radius: 50% !important;
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+    text-align: center;
 }
 
 #eventpasswordTitle {
@@ -129,6 +138,7 @@ ul.mainMenu li{
 
 #checkedGuests{
     float: right;
+    margin-right: 10px;
 }
 
 .ui-btn{
