@@ -13,8 +13,8 @@ Storage.prototype.getObject = function(key) {
 
 $( document ).ready(function() {
 if(typeof io != "undefined") {
-	//var socket = io.connect("https://www.uberguestlist.com/");
-  var socket = io.connect("http://www.ugl.loc/");
+	var socket = io.connect("https://www.uberguestlist.com/");
+  //var socket = io.connect("http://www.ugl.loc/");
 	var guestlistMetadata = {};
 
 	// Functionality: hiding list before the orginized enters guest's name
