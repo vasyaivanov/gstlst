@@ -51,7 +51,8 @@ ul.mainMenu li{
     border-bottom: none;
     margin: 0px;
     padding: 0px;
-    font-size: 36px;
+    font-size: 30px;
+    font-weight: bold;
     text-align: center;
     vertical-align: middle;
     height: 40px;
@@ -93,7 +94,9 @@ ul.mainMenu li{
     font-weight: bold;
     font-size: 20px;
     vertical-align: middle;
-    margin-bottom: 15px;
+    margin-bottom: 40px;
+    margin-top: -21px;
+    color: #aaa;
 }
 
 #eventButton {
