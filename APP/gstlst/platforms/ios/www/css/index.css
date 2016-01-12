@@ -91,6 +91,9 @@ ul.mainMenu li{
 
 #eventName {
     font-weight: bold;
+    font-size: 20px;
+    vertical-align: middle;
+    margin-bottom: 15px;
 }
 
 #eventButton {
@@ -114,11 +117,31 @@ ul.mainMenu li{
 #addCheckedGuestNumberButton {
     float: right;
     margin-top: -10px;
+    margin-left: 5px;
     border-radius: 50% !important;
     width: 40px;
     height: 40px;
     font-size: 14px;
     text-align: center;
+}
+
+#removeCheckedGuestNumberButton {
+    float: right;
+    margin-top: -10px;
+    margin-right: 5px;
+    border-radius: 50% !important;
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+    text-align: center;
+}
+
+#totalGuestsDiv {
+    float: left;
+}
+
+#checkedGuestsDiv {
+    float: right;
 }
 
 #eventpasswordTitle {
@@ -168,6 +191,7 @@ ul.mainMenu li{
 
 #event {
 	display: none;
+    margin-top:-10px;
 }
 
 #enterEventPass {
