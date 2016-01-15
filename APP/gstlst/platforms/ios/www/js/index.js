@@ -189,10 +189,10 @@ if(typeof io != "undefined") {
 		$("#loadingPage").hide();
 	}
 
-	 $( ".ui-controlgroup-controls" ).on( "swipe", swipeHandler );
+	 /*$( ".ui-controlgroup-controls" ).on( "swipe", swipeHandler );
   	function swipeHandler( event ){
     	removeGuest(event.target.id);
-	}
+	  }*/
 
 	function addGuest(){
     var newGName = $("#addGuestName").val();
