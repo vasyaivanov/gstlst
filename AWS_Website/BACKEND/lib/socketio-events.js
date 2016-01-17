@@ -281,7 +281,7 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
           module.parent.exports.checkEvent(data.eventId, function(ret) {
             if(ret.found == 1) {
               var count = (data.action == 1) ? ret.count+1 : ret.count-1;
-              if(count < 0) {
+              if(count+ret.marked < 0) {
                 callback({code: 1});
               }
               else {

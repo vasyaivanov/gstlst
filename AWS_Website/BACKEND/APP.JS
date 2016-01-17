@@ -519,7 +519,10 @@ function ensureAuthenticated(req, res, next) {
 module.exports.checkEvent = function(eventId, callback) {
 	Event.findOne({eventId : eventId }).exec(function (err, doc) {
 		if( doc ) {
-			callback({found: 1, name: doc.name, count: doc.addCount});
+      var markedRecords = Guests.count({eventId: eventId, marked: 1});
+      markedRecords.then(function(marked) {
+			     callback({found: 1, name: doc.name, count: doc.addCount, marked: marked});
+      });
 		}
 		else {
 			callback({found: 0});
