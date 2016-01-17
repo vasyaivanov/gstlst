@@ -141,9 +141,16 @@ if(typeof io != "undefined") {
       appObj.addNewGuest(data);
   });
 
-  socket.on("markedAdded", function(data) {
+  socket.on("markedChanged", function(data) {
       if(data.eventId == localStorage.getItem("lastEvent")) {
-        appObj.changeOnlineStats(2,1);
+        if(data.action == 1) {
+          appObj.changeOnlineStats(1,1);
+          appObj.changeOnlineStats(2,1);
+        }
+        else {
+          appObj.changeOnlineStats(1,-1);
+          appObj.changeOnlineStats(2,-1);
+        }
       }
   });
 
@@ -231,9 +238,21 @@ if(typeof io != "undefined") {
 
   $("#addCheckedGuestNumberButton").click(function() {
     if(appObj.connected == 1) {
-      socket.emit("addMarked", {eventId: localStorage.getItem("lastEvent") }, function(data) {
+      socket.emit("changeMarked", {eventId: localStorage.getItem("lastEvent"), action: 1 }, function(data) {
         if(data.code == 0) {
           appObj.changeOnlineStats(2,1);
+          appObj.changeOnlineStats(1,1);
+        }
+      });
+    }
+  });
+
+  $("#removeCheckedGuestNumberButton").click(function() {
+    if(appObj.connected == 1) {
+      socket.emit("changeMarked", {eventId: localStorage.getItem("lastEvent"), action: -1 }, function(data) {
+        if(data.code == 0) {
+          appObj.changeOnlineStats(2,-1);
+          appObj.changeOnlineStats(1,-1);
         }
       });
     }
