@@ -2,6 +2,9 @@ var appObj = new Object();
 appObj.connected = 0;
 appObj.listLoaded = 0;
 
+var audioClick = new Audio('./click.mp3');
+audioClick.volume = 0.1;
+
 Storage.prototype.setObject = function(key, value) {
     this.setItem(key, JSON.stringify(value));
 }
@@ -240,6 +243,7 @@ if(typeof io != "undefined") {
     if(appObj.connected == 1) {
       socket.emit("changeMarked", {eventId: localStorage.getItem("lastEvent"), action: 1 }, function(data) {
         if(data.code == 0) {
+          audioClick.play();
           appObj.changeOnlineStats(2,1);
           appObj.changeOnlineStats(1,1);
         }
@@ -251,6 +255,7 @@ if(typeof io != "undefined") {
     if(appObj.connected == 1) {
       socket.emit("changeMarked", {eventId: localStorage.getItem("lastEvent"), action: -1 }, function(data) {
         if(data.code == 0) {
+          audioClick.play();
           appObj.changeOnlineStats(2,-1);
           appObj.changeOnlineStats(1,-1);
         }
