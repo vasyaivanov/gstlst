@@ -124,7 +124,9 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
 					var converter = new csvConverter({noheader:true, headers:["Name"]});
 					converter.fromFile(name,function(err,result){
 						var operc = (100 / result.length);
-						var insertEvent = new module.parent.exports.Event({eventId: eventHash, name: origName});
+            var eventName = origName;
+            eventName = eventName.replace(/(\_|\.csv)/gi,"");
+						var insertEvent = new module.parent.exports.Event({eventId: eventHash, name: eventName});
 						insertEvent.save(function(err, saved) {
 							if(err) {
 								uploadError(0);
@@ -208,7 +210,7 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
                 guestList.then(function(docs) {
                   totalRecords.then(function(total) {
                     markedRecords.then(function(marked) {
-                        callback({code: 0, guests: docs, name: ret.name, total: total, marked: marked + ret.count});
+                        callback({code: 0, guests: docs, name: ret.name, total: total + ret.count, marked: marked + ret.count});
                     });
                   });
                 });
@@ -275,17 +277,22 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
     			});
         });
 
-        socket.on('addMarked', function (data, callback) {
+        socket.on('changeMarked', function (data, callback) {
           module.parent.exports.checkEvent(data.eventId, function(ret) {
-            console.log(ret);
             if(ret.found == 1) {
-              module.parent.exports.Event.update({eventId: data.eventId },{$set: {addCount: ret.count+1 }}, function(err,updated) {
-                  if(!err) {
-                    socket.broadcast.emit('markedAdded', {eventId: data.eventId});
-                    callback({code: 0});
-                  }
-                  else {callback({code: 1})}
-              });
+              var count = (data.action == 1) ? ret.count+1 : ret.count-1;
+              if(count < 0) {
+                callback({code: 1});
+              }
+              else {
+                  module.parent.exports.Event.update({eventId: data.eventId },{$set: {addCount: count }}, function(err,updated) {
+                    if(!err) {
+                      socket.broadcast.emit('markedChanged', {eventId: data.eventId, action: data.action});
+                      callback({code: 0});
+                    }
+                    else {callback({code: 1})}
+                  });
+              }
             }
           });
         });
