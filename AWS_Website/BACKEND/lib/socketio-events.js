@@ -297,6 +297,14 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
           });
         });
 
+
+        socket.on('ddCountPlusOne', function (data, callback) {
+            if(data.id) {
+              socket.broadcast.emit("ddCountUpdate", { id: data.id });
+              callback({ code: 1});
+            }
+        });
+
       }
     }
 });
