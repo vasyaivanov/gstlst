@@ -9,7 +9,8 @@ var url = require('url')
   , supportUplExtensions = [".csv"]
   , csvConverter = require("csvtojson").Converter
   , LOG_COORD = true
-  , LOG_GENERAL = true;
+  , LOG_GENERAL = true
+  , ddCounts = {};
 var start = process.hrtime();
 
 //
@@ -297,11 +298,12 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
           });
         });
 
-
         socket.on('ddCountPlusOne', function (data, callback) {
             if(data.id) {
-              socket.broadcast.emit("ddCountUpdate", { id: data.id });
-              callback({ code: 1});
+              if(typeof ddCounts[data.id] === 'undefined') {ddCounts[data.id] = 0;}
+              ddCounts[data.id] = ddCounts[data.id] + 1;
+              socket.broadcast.emit("ddCountUpdate", { id: data.id, count: ddCounts[data.id] });
+              callback({ code: 1, count: ddCounts[data.id]});
             }
         });
 
