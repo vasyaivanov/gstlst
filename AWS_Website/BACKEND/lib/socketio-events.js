@@ -303,7 +303,7 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
               if(typeof ddCounts[data.id] === 'undefined') {ddCounts[data.id] = 0;}
               ddCounts[data.id] = ddCounts[data.id] + 1;
               socket.broadcast.emit("ddCountUpdate", { id: data.id, count: ddCounts[data.id] });
-              callback({ code: 1, count: ddCounts[data.id]});
+              callback({ code: 1, count: ddCounts[data.id], counts: ddCounts});
             }
         });
 
