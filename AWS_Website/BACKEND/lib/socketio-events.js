@@ -307,6 +307,11 @@ module.parent.exports.io.sockets.on('connection', function (socket) {
             }
         });
 
+        socket.on('ddGetCounts', function (callback) {
+              callback({ counts: ddCounts});
+            }
+        });
+
       }
     }
 });
