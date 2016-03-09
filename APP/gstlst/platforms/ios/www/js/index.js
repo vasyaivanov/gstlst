@@ -16,7 +16,7 @@ Storage.prototype.getObject = function(key) {
 
 $( document ).ready(function() {
 if(typeof io != "undefined") {
-	var socket = io.connect("https://www.uberguestlist.com/");
+	var socket = io.connect("https://www.partyguestlist.com/");
   //var socket = io.connect("http://www.ugl.loc/");
 	var guestlistMetadata = {};
 
