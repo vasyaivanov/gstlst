@@ -49,7 +49,8 @@ if(typeof io != "undefined") {
     if(appObj.findGuestId(guestId)) {
 			socket.emit("markGuest", {eventId: localStorage.getItem("lastEvent"), guestId: appObj.findGuestId(guestId) }, function(data) {
 				if(data.code == 0) {
-          appObj.changeOnlineStats(2,1);
+                    audioClick.play();
+                    appObj.changeOnlineStats(2,1);
 					appObj.removeFromList(guestId,1);
 				}
 			});
@@ -241,9 +242,9 @@ if(typeof io != "undefined") {
 
   $("#addCheckedGuestNumberButton").click(function() {
     if(appObj.connected == 1) {
+      audioClick.play();
       socket.emit("changeMarked", {eventId: localStorage.getItem("lastEvent"), action: 1 }, function(data) {
         if(data.code == 0) {
-          audioClick.play();
           appObj.changeOnlineStats(2,1);
           appObj.changeOnlineStats(1,1);
         }
@@ -253,9 +254,10 @@ if(typeof io != "undefined") {
 
   $("#removeCheckedGuestNumberButton").click(function() {
     if(appObj.connected == 1) {
+      audioClick.play();
       socket.emit("changeMarked", {eventId: localStorage.getItem("lastEvent"), action: -1 }, function(data) {
         if(data.code == 0) {
-          audioClick.play();
+          //audioClick.play();
           appObj.changeOnlineStats(2,-1);
           appObj.changeOnlineStats(1,-1);
         }
