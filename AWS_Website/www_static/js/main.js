@@ -133,7 +133,7 @@ $(document).ready(function () {
 
 
 	mainSocket.on("uploadProgress", function (data) {
-        data.msg = "Guest list uploaded!<br>Download our <a style='color:#337ab7;text-decoration:underline' href=\"https://itunes.com\">app</a> and enter this password:<br><span id='displayedPassword'><a><i>" + data.eventId + "</i></a></span><br>to manage this guest list";
+        data.msg = "Guest list uploaded!<br>Download our <a style='color:#337ab7;text-decoration:underline' href=\"https://itunes.apple.com/us/app/party-guestlist/id1091456072?mt=8\">app</a> and enter this password:<br><span id='displayedPassword'><a><i>" + data.eventId + "</i></a></span><br>to manage this guest list";
         if (data.percentage >= 0) {
           data.error = false;
           updateProgress(data);
