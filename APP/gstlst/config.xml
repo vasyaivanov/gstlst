@@ -9,5 +9,9 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
-    <icon src="icon.png">
+    <icon src="icon.png" />
+    <plugin name="cordova-plugin-facebook4" spec="~1.7.0">
+        <variable name="APP_ID" value="1614240855554037" />
+        <variable name="APP_NAME" value="Party Guest List" />
+    </plugin>
 </widget>

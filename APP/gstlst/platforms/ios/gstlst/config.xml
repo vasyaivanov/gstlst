@@ -19,6 +19,16 @@
     <feature name="LocalStorage">
         <param name="ios-package" value="CDVLocalStorage" />
     </feature>
+    <feature name="FacebookConnectPlugin">
+        <param name="ios-package" value="FacebookConnectPlugin" />
+        <param name="onload" value="true" />
+    </feature>
+    <plugin name="FacebookConnectPlugin" value="FacebookConnectPlugin" />
+    <access origin="https://m.facebook.com" />
+    <access origin="https://graph.facebook.com" />
+    <access origin="https://api.facebook.com" />
+    <access origin="https://*.fbcdn.net" />
+    <access origin="https://*.akamaihd.net" />
     <name>gstlst</name>
     <description>
         A sample Apache Cordova application that responds to the deviceready event.
@@ -28,4 +38,5 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <icon src="icon.png" />
 </widget>

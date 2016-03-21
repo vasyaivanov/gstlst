@@ -5,7 +5,6 @@
 	};
 	objectVersion = 46;
 	objects = {
-
 /* Begin PBXBuildFile section */
 		04BCCF821C350D6B003B1BDA /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04BCCF811C350D6B003B1BDA /* Media.xcassets */; };
 		04EEAA511C33A3F8001C1C18 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04EEAA501C33A3F8001C1C18 /* Images.xcassets */; };
@@ -17,6 +16,11 @@
 		302D95F214D2391D003F00A1 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 302D95F014D2391D003F00A1 /* MainViewController.xib */; };
 		305D5FD1115AB8F900A74A75 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 305D5FD0115AB8F900A74A75 /* MobileCoreServices.framework */; };
 		5B1594DD16A7569C00FEF299 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B1594DC16A7569C00FEF299 /* AssetsLibrary.framework */; };
+		719EEE80BE574C59A0800B96 /* FacebookConnectPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 70443B2367F4407B84910A96 /* FacebookConnectPlugin.m */; };
+		B579E5334EBA4D48A09B0ECD /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05F3CA99DAA9445795F731EA /* Bolts.framework */; };
+		DD6219E34EB0466394AD2DE2 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C69A288647464BC9BDA290A7 /* FBSDKCoreKit.framework */; };
+		8593E148FC664764908A208D /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BC977FE26BD4022B0ACADDD /* FBSDKLoginKit.framework */; };
+		6BD40F1CE9F84E46A05DCE9A /* FBSDKShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E8792C0650C4A0ABD5A9B9F /* FBSDKShareKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +61,12 @@
 		EB87FDF31871DA8E0020F90C /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = ../../www; sourceTree = "<group>"; };
 		EB87FDF41871DAF40020F90C /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = ../../config.xml; sourceTree = "<group>"; };
 		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = gstlst/config.xml; sourceTree = "<group>"; };
+		70443B2367F4407B84910A96 /* FacebookConnectPlugin.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "FacebookConnectPlugin.m"; path = "cordova-plugin-facebook4/FacebookConnectPlugin.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		B82FE59F0EE24CDCB5098476 /* FacebookConnectPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "FacebookConnectPlugin.h"; path = "cordova-plugin-facebook4/FacebookConnectPlugin.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		05F3CA99DAA9445795F731EA /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "Bolts.framework"; path = "gstlst/Plugins/cordova-plugin-facebook4/Bolts.framework"; sourceTree = "<group>"; };
+		C69A288647464BC9BDA290A7 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "FBSDKCoreKit.framework"; path = "gstlst/Plugins/cordova-plugin-facebook4/FBSDKCoreKit.framework"; sourceTree = "<group>"; };
+		4BC977FE26BD4022B0ACADDD /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "FBSDKLoginKit.framework"; path = "gstlst/Plugins/cordova-plugin-facebook4/FBSDKLoginKit.framework"; sourceTree = "<group>"; };
+		1E8792C0650C4A0ABD5A9B9F /* FBSDKShareKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "FBSDKShareKit.framework"; path = "gstlst/Plugins/cordova-plugin-facebook4/FBSDKShareKit.framework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,6 +78,10 @@
 				301BF552109A68D80062928A /* libCordova.a in Frameworks */,
 				288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */,
 				305D5FD1115AB8F900A74A75 /* MobileCoreServices.framework in Frameworks */,
+				B579E5334EBA4D48A09B0ECD /* Bolts.framework in Frameworks */,
+				DD6219E34EB0466394AD2DE2 /* FBSDKCoreKit.framework in Frameworks */,
+				8593E148FC664764908A208D /* FBSDKLoginKit.framework in Frameworks */,
+				6BD40F1CE9F84E46A05DCE9A /* FBSDKShareKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -142,6 +156,10 @@
 				5B1594DC16A7569C00FEF299 /* AssetsLibrary.framework */,
 				288765FC0DF74451002DB57D /* CoreGraphics.framework */,
 				305D5FD0115AB8F900A74A75 /* MobileCoreServices.framework */,
+				05F3CA99DAA9445795F731EA /* Bolts.framework */,
+				C69A288647464BC9BDA290A7 /* FBSDKCoreKit.framework */,
+				4BC977FE26BD4022B0ACADDD /* FBSDKLoginKit.framework */,
+				1E8792C0650C4A0ABD5A9B9F /* FBSDKShareKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -157,6 +175,8 @@
 		307C750510C5A3420062BCA9 /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
+				70443B2367F4407B84910A96 /* FacebookConnectPlugin.m */,
+				B82FE59F0EE24CDCB5098476 /* FacebookConnectPlugin.h */,
 			);
 			name = Plugins;
 			path = gstlst/Plugins;
@@ -213,7 +233,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0510;
+				LastUpgradeCheck = 510;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
 						DevelopmentTeam = G568HXCZ4L;
@@ -298,6 +318,7 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* AppDelegate.m in Sources */,
 				302D95F114D2391D003F00A1 /* MainViewController.m in Sources */,
+				719EEE80BE574C59A0800B96 /* FacebookConnectPlugin.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -346,6 +367,13 @@
 				PRODUCT_NAME = gstlst;
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"gstlst/Plugins/cordova-plugin-facebook4\"",
+					"\"gstlst/Plugins/cordova-plugin-facebook4\"",
+					"\"gstlst/Plugins/cordova-plugin-facebook4\"",
+					"\"gstlst/Plugins/cordova-plugin-facebook4\"",
+				);
 			};
 			name = Debug;
 		};
@@ -387,6 +415,13 @@
 				PRODUCT_NAME = gstlst;
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"gstlst/Plugins/cordova-plugin-facebook4\"",
+					"\"gstlst/Plugins/cordova-plugin-facebook4\"",
+					"\"gstlst/Plugins/cordova-plugin-facebook4\"",
+					"\"gstlst/Plugins/cordova-plugin-facebook4\"",
+				);
 			};
 			name = Release;
 		};

@@ -3,7 +3,15 @@
         "installed": [],
         "uninstalled": []
     },
-    "config_munge": {},
-    "installed_plugins": {},
+    "config_munge": {
+        "files": {}
+    },
+    "installed_plugins": {
+        "cordova-plugin-facebook4": {
+            "APP_ID": "1614240855554037",
+            "APP_NAME": "Party Guest List",
+            "PACKAGE_NAME": "$(PRODUCT_BUNDLE_IDENTIFIER)"
+        }
+    },
     "dependent_plugins": {}
 }
