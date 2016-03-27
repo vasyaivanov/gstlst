@@ -7,6 +7,29 @@
 </head>
 <body>
 <script>
+  function printEventWallMessages(eventId){
+        $("#information").hide("slow");
+        $("#status").hide("slow");
+        $("#wallPosts").show("slow");
+        FB.api("/" + eventId + "/feed",handleEventFeed); 
+      }
+
+      function handleEventFeed(response){
+        if (response && !response.error) {
+          if(response.data){
+            for (i = 0; i < response.data.length; i++) {
+              if(response.data[i] && response.data[i].message){
+                console.log(response.data[i].message);
+                $("#wallPosts").prepend("<hr><br><div>" + response.data[i].message + "</div>");
+              }
+            }
+          }
+             if (response.paging && response.paging.next != "undefined"){
+               FB.api(response.paging.next, handleEventFeed);
+             }
+        }
+      }
+
   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
     console.log('statusChangeCallback');
@@ -14,7 +37,13 @@
     // app know the current login status of the person.
     // Full docs on the response object can be found in the documentation
     // for FB.getLoginStatus().
+
+    
+
     if (response.status === 'connected') {
+
+      //printEventWallMessages("501336290037184");
+
       FB.api('/me/events', 'get', function(response) {
           if(response.data) {
             $("#information").append("<hr>");
@@ -27,6 +56,7 @@
                 out += response.data[prop].name;
                 out += '<br>Date: ' + extrDate.getMonth() + '/' + extrDate.getDate() + '/' + extrDate.getFullYear() + ' at ' + ((extrDate.getHours() > 12) ? (extrDate.getHours() - 12 + '.' + extrDate.getMinutes() + 'pm') : extrDate.getHours() + '.' + extrDate.getMinutes() + 'am');
                 out += '<br><a href="https://facebook.com/'+ response.data[prop].id +'" target="_blank">Open event</a>';
+                out += '&nbsp;&nbsp;&nbsp;<a href="javascript:printEventWallMessages(' + response.data[prop].id + ')">Show Wall Posts</a>';
                 out += '<hr>';
                 $("#information").append(out);
               }
@@ -116,7 +146,9 @@
 </div>
 
 <div id="information">
+</div>
 
+<div id="wallPosts">
 </div>
 
 </body>
