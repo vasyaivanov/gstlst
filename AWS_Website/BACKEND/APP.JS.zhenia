@@ -1,0 +1,69 @@
+var express = require('express')
+  , logger = require('morgan')
+  , cookieParser = require('cookie-parser')
+  , bodyParser = require('body-parser')
+  , session = require('express-session')
+  , methodOverride = require('method-override')
+  , flash = require('connect-flash')
+  , fs = require('fs')
+  , passport = require('passport')
+  , util = require('util')
+  , LocalStrategy = require('passport-local').Strategy
+  , path = require('path')
+  , moment = require('moment')
+  , dbImport = require("./lib/db.js")
+  , appPort = 8081
+  , ioPort = 1337
+  , sessionIdCookie = "GuestListCurrUser"
+  , LOG_GENERAL = true
+  , DEBUG = false
+  , paypalIpn = require('paypal-ipn');
+
+var app = express();
+module.exports.app = app;
+module.exports.sessionIdCookie = sessionIdCookie;
+
+var phantom = require("fluent-phantom");
+phantom.create().select('#gbqfbb')["with"]().members('innerText').from('http://www.google.com').and().process(function(elements) {
+  console.log("JD: 1");
+  var element, i, len, results;
+  results = [];
+  for (i = 0, len = elements.length; i < len; i++) {
+    console.log("JD: i="+i);
+    /*
+    element = elements[i];
+    results.push(new Headline(element.innerText).save());
+    */
+  }
+  return results;
+}).until(5000).otherwise(function() {
+  throw Error("Headlines were never loaded");
+}).execute();
+
+/*
+var casper = require("casper").create({
+    pageSettings: {
+        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:23.0) Gecko/20130404 Firefox/23.0"
+    }
+});
+
+var url = 'https://l3com.taleo.net/careersection/l3_ext_us/jobsearch.ftl';
+var currentPage = 1;
+var jobs = [];
+
+var terminate = function() {
+    this.echo("Exiting..").exit();
+};
+
+casper.start(url);
+casper.waitForSelector('table#jobs', processPage, terminate);
+casper.run();
+
+/*
+var request = require('request');
+request('https://ballotpedia.org/Sample_Ballot_Lookup?address=94040&lookup=sample+ballot', function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    console.log(body) // Show the HTML for the Google homepage.
+  }
+})*/
+
